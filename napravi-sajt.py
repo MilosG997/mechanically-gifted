@@ -178,7 +178,7 @@ META = {
         "og_alt": "Mechanically Gifted – izrada sajtova, Shopify i QA testiranje",
     },
     "en": {
-        "title": "Mechanically Gifted – Shopify Development, Web Design & QA Automation",
+        "title": "Mechanically Gifted – Shopify, Web Design & QA Automation",
         "desc": "Shopify development, websites for small businesses and automated QA testing with Selenium. Working with clients in Serbia and abroad. Free project quote.",
         "url": DOMEN + "/en/", "locale": "en_US", "alt_locale": "sr_RS",
         "usluga": "Shopify design and development, simple websites, QA test automation.",
