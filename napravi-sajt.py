@@ -73,7 +73,9 @@ def stranica(jez):
     drugi = ('<a href="/en/" hreflang="en" lang="en">English</a>' if jez == "sr"
              else '<a href="/" hreflang="sr" lang="sr">Srpski</a>')
     b = re.sub(r'<footer><div class="w"><span>(.*?)</span><span>(.*?)</span></div></footer>',
-               lambda mm: f'<footer><div class="w"><span>{mm.group(1)} · {mm.group(2)}</span><nav>'
+               # bez zemlje na kraju; usluge su poseban deo koji na telefonu ide u svoj red (ceo)
+               lambda mm: f'<footer><div class="w"><span class="ft"><span>{mm.group(1)}</span>'
+                          f'<span class="ft-usl">{re.sub(r" · (Srbija|Serbia)$", "", mm.group(2))}</span></span><nav>'
                           f'<a href="mailto:{EMAIL}">Email</a>'
                           f'<a href="{LINKOVI["GitHub"]}" target="_blank" rel="noopener">GitHub</a>'
                           f'{drugi}<a href="{PRIVATNOST[jez]}">{"Privatnost" if jez == "sr" else "Privacy"}</a>'

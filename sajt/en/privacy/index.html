@@ -256,6 +256,11 @@ body.zakljucan{overflow:hidden}
 .w{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .contact .box{padding:36px 12px}
 }
+
+/* Podnožje: usluge uvek u jednom redu; na telefonu ispod © reda */
+.ft-usl{white-space:nowrap}
+.ft-usl::before{content:" · "}
+@media (max-width:640px){.ft{display:grid;gap:2px}.ft-usl::before{content:none}}
 </style>
 </head>
 <body>
@@ -273,7 +278,7 @@ body.zakljucan{overflow:hidden}
 <p>When you send me a message through the form, email, Viber or WhatsApp, I use what you enter (name, email, project description, budget) only to reply and prepare a quote. Form submissions are stored by Netlify, the service that hosts this site. I do not sell or share your data.</p>
 <h2>Your rights</h2>
 <p>You can ask to see, correct or delete the data I have about you: email <a href="mailto:mechanicallygifted@gmail.com">mechanicallygifted@gmail.com</a>.</p></article></div></section></main>
-<footer><div class="w"><span>© 2026 Mechanically Gifted · Shopify developer · Web design · QA automation · Serbia</span><nav><a href="mailto:mechanicallygifted@gmail.com">Email</a><a href="https://github.com/MilosG997" target="_blank" rel="noopener">GitHub</a><a href="/" hreflang="sr" lang="sr">Srpski</a><a href="/en/privacy/">Privacy</a></nav></div></footer>
+<footer><div class="w"><span class="ft"><span>© 2026 Mechanically Gifted</span><span class="ft-usl">Shopify developer · Web design · QA automation</span></span><nav><a href="mailto:mechanicallygifted@gmail.com">Email</a><a href="https://github.com/MilosG997" target="_blank" rel="noopener">GitHub</a><a href="/" hreflang="sr" lang="sr">Srpski</a><a href="/en/privacy/">Privacy</a></nav></div></footer>
 <script>
 (()=>{if(location.hostname!=="mechanicallygifted.rs")return;
 window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};

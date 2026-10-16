@@ -256,6 +256,11 @@ body.zakljucan{overflow:hidden}
 .w{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .contact .box{padding:36px 12px}
 }
+
+/* Podnožje: usluge uvek u jednom redu; na telefonu ispod © reda */
+.ft-usl{white-space:nowrap}
+.ft-usl::before{content:" · "}
+@media (max-width:640px){.ft{display:grid;gap:2px}.ft-usl::before{content:none}}
 </style>
 </head>
 <body>
@@ -273,7 +278,7 @@ body.zakljucan{overflow:hidden}
 <p>Kada mi pošaljete poruku preko forme, emaila, Vibera ili WhatsApp-a, podatke koje upišete (ime, email, opis posla, budžet) koristim samo da vam odgovorim i pripremim ponudu. Poruke iz forme čuva Netlify, servis na kom je sajt. Podatke ne prodajem i ne delim ni sa kim.</p>
 <h2>Vaša prava</h2>
 <p>Možete tražiti da vidite, ispravite ili obrišete podatke koje imam o vama: pišite na <a href="mailto:mechanicallygifted@gmail.com">mechanicallygifted@gmail.com</a>.</p></article></div></section></main>
-<footer><div class="w"><span>© 2026 Mechanically Gifted · Izrada sajtova · Shopify · QA testiranje · Srbija</span><nav><a href="mailto:mechanicallygifted@gmail.com">Email</a><a href="https://github.com/MilosG997" target="_blank" rel="noopener">GitHub</a><a href="/en/" hreflang="en" lang="en">English</a><a href="/privatnost/">Privatnost</a></nav></div></footer>
+<footer><div class="w"><span class="ft"><span>© 2026 Mechanically Gifted</span><span class="ft-usl">Izrada sajtova · Shopify · QA testiranje</span></span><nav><a href="mailto:mechanicallygifted@gmail.com">Email</a><a href="https://github.com/MilosG997" target="_blank" rel="noopener">GitHub</a><a href="/en/" hreflang="en" lang="en">English</a><a href="/privatnost/">Privatnost</a></nav></div></footer>
 <script>
 (()=>{if(location.hostname!=="mechanicallygifted.rs")return;
 window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};

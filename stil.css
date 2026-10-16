@@ -218,3 +218,8 @@ body.zakljucan{overflow:hidden}
 .w{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .contact .box{padding:36px 12px}
 }
+
+/* Podnožje: usluge uvek u jednom redu; na telefonu ispod © reda */
+.ft-usl{white-space:nowrap}
+.ft-usl::before{content:" · "}
+@media (max-width:640px){.ft{display:grid;gap:2px}.ft-usl::before{content:none}}
