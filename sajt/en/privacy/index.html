@@ -244,6 +244,18 @@ footer a:hover{color:var(--fg)}
 .lb-pre{left:16px}.lb-sled{right:16px}
 @media (max-width:760px){.lb{padding:64px 10px 10px}.lb-slike{max-height:calc(100dvh - 260px)}.lb-nav{top:auto;bottom:max(18px,env(safe-area-inset-bottom,0px));transform:none;width:42px;height:42px}.lb-pre{left:auto;right:66px}.lb-sled{right:16px}.lb-info{padding:14px 16px 64px}.lb-meta{text-align:left}}
 body.zakljucan{overflow:hidden}
+
+/* Telefon: email i telefon u kontaktu staju u jedan red */
+@media (max-width:520px){
+.contact .box{padding:40px 16px}
+.c{padding:12px;gap:8px}
+.c span{font-size:clamp(12.5px,3.6vw,16px);letter-spacing:-.01em}
+.c button{padding:7px 9px;font-size:11px}
+}
+@media (max-width:380px){
+.w{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.contact .box{padding:36px 12px}
+}
 </style>
 </head>
 <body>
