@@ -16,9 +16,8 @@ LINKOVI = {
     "GitHub": "https://github.com/MilosG997",
     "QA": "https://github.com/MilosG997/qa-automation",
 }
-# Snimci projekata u sajt/img (pravi ih napravi-slike.py)
-SLIKE = {"Eskay Products": "eskay", "Tan Ti Studio": "tanti", "Majstori Pazova": "majstori",
-         "QA testovi i GitHub": "qa", "QA tests and GitHub": "qa"}
+from portfolio import KATEGORIJE, RADOVI, jezik, velicine
+VELICINE = velicine()  # dimenzije slika iz sajt/img/portfolio (pravi ih portfolio.py)
 
 TU = os.path.dirname(os.path.abspath(__file__))
 IZLAZ = os.path.join(TU, "sajt")
@@ -65,21 +64,10 @@ def stranica(jez):
                f'<a href="/" hreflang="sr" lang="sr"{sr_akt}>SR</a>'
                f'<a href="/en/" hreflang="en" lang="en"{en_akt}>EN</a></div>', b, count=1, flags=re.S)
 
-    # Portfolio linkovi u novom tabu
-    for ime, url in LINKOVI.items():
-        b = re.sub(r'(<div class="shot"[^>]*>' + re.escape(ime) + r'.*?)<a href="#">',
-                   lambda mm: mm.group(1) + f'<a href="{url}" target="_blank" rel="noopener">', b, count=1, flags=re.S)
-    # Poslednja kartica (QA testovi i GitHub) ima drugačiji naslov
-    b = b.replace('<a href="#">', f'<a href="{LINKOVI["QA"]}" target="_blank" rel="noopener">', 1)
-    assert 'href="#"' not in b
-
-    # Prava slika projekta u kartici, naslov preko nje
-    def snimak(mm):
-        naslov = mm.group(1)
-        ime = SLIKE[html.unescape(naslov)]
-        return (f'<div class="shot"><img src="/img/{ime}.webp" alt="" width="960" height="540" '
-                f'loading="lazy" decoding="async"><span>{naslov}</span></div>')
-    b = re.sub(r'<div class="shot">([^<]*)</div>', snimak, b)
+    # Portfolio: filteri + kartice iz portfolio.py (stare 4 kartice iz dizajna se menjaju)
+    b, n = re.subn(r'<div class="work">.*?</article></div>(?=</div></section>\s*<section id="pitanja")',
+                   lambda mm: portfolio_html(jez), b, count=1, flags=re.S)
+    assert n == 1
 
     # Podnožje: email, GitHub, drugi jezik
     drugi = ('<a href="/en/" hreflang="en" lang="en">English</a>' if jez == "sr"
@@ -106,7 +94,72 @@ def stranica(jez):
     assert "apps" in b and "LinkedIn" not in b
     if jez == "en":  # ova oznaka nije bila u rečniku
         b = b.replace("<small>Telefon · Viber · WhatsApp</small>", "<small>Phone · Viber · WhatsApp</small>")
+    b = b.replace("</main>", "</main>\n" + lightbox_html(jez), 1)
     return b
+
+
+def portfolio_html(jez):
+    """Filteri, kartice i prazan lightbox; podaci za galeriju idu u JSON na dnu."""
+    t = T[jez]
+    rec = {"sr": {"pogledaj": "Pogledaj", "dizajn": "Pogledaj dizajn", "filteri": "Filtriraj radove",
+                  "otvori": "Otvori galeriju"},
+           "en": {"pogledaj": "View", "dizajn": "View design", "filteri": "Filter projects",
+                  "otvori": "Open gallery"}}[jez]
+    e = lambda x: html.escape(x, quote=True)
+    filteri = "".join(
+        f'<button type="button" data-filter="{k}" aria-pressed="{"true" if k == "sve" else "false"}">'
+        f'{sr if jez == "sr" else en}</button>' for k, sr, en in KATEGORIJE)
+    kartice = []
+    for i, r in enumerate(RADOVI):
+        naslov = jezik(r["naslov"], jez)
+        opis = t[r["opis_kljuc"]] if "opis_kljuc" in r else r["opis"][jez]
+        chips = "".join(f'<span class="chip">{e(jezik(c, jez))}</span>' for c in r["chips"])
+        w, h = 800, 450
+        slika = (f'<img src="/img/portfolio/{r["slug"]}-thumb.webp" alt="{e(r["alt"][jez])}" '
+                 f'width="{w}" height="{h}" loading="lazy" decoding="async">')
+        if "link" in r:
+            tekst = jezik(r.get("link_tekst", {"sr": f'{rec["pogledaj"]} {naslov}', "en": f'{rec["pogledaj"]} {naslov}'}), jez)
+            dugme = f'<a href="{r["link"]}" target="_blank" rel="noopener">{e(tekst)}</a>'
+        else:
+            dugme = f'<button type="button" class="vise" data-lb="{i}">{rec["dizajn"]}</button>'
+        klijent = f'<small class="klijent">{e(jezik(r["klijent"], jez))}</small>' if "klijent" in r else ""
+        kartice.append(
+            f'<article class="case" data-kat="{r["kat"]}">'
+            f'<button type="button" class="shot" data-lb="{i}" aria-label="{rec["otvori"]}: {e(naslov)}">'
+            f'{slika}<span>{e(naslov)}</span></button>'
+            f'<div class="bd"><div class="chips">{chips}</div>{klijent}<p>{e(opis)}</p>{dugme}</div></article>')
+    return (f'<div class="filteri" role="group" aria-label="{rec["filteri"]}">{filteri}</div>'
+            f'<div class="work">{"".join(kartice)}</div>')
+
+
+def galerija_json(jez):
+    """Slajdovi za lightbox: jedna stavka po radu, sa svim slikama tog rada."""
+    t = T[jez]
+    out = []
+    for r in RADOVI:
+        out.append({"naslov": jezik(r["naslov"], jez),
+                    "opis": t[r["opis_kljuc"]] if "opis_kljuc" in r else r["opis"][jez],
+                    "alat": r["alat"], "kat": r["kat"], "alt": r["alt"][jez],
+                    "slike": [[f'/img/portfolio/{r["slug"]}-{n + 1}.webp', w, h]
+                              for n, (w, h) in enumerate(VELICINE[r["slug"]])]})
+    return json.dumps(out, ensure_ascii=False)
+
+
+LIGHTBOX = {"sr": {"zatvori": "Zatvori", "pre": "Prethodni rad", "sled": "Sledeći rad", "alat": "Alat"},
+            "en": {"zatvori": "Close", "pre": "Previous project", "sled": "Next project", "alat": "Tools"}}
+
+
+def lightbox_html(jez):
+    L = LIGHTBOX[jez]
+    return (f'<div class="lb" id="lb" role="dialog" aria-modal="true" aria-labelledby="lbNaslov" hidden>'
+            f'<button type="button" class="lb-x" aria-label="{L["zatvori"]}">&times;</button>'
+            f'<button type="button" class="lb-nav lb-pre" aria-label="{L["pre"]}">&#8249;</button>'
+            f'<button type="button" class="lb-nav lb-sled" aria-label="{L["sled"]}">&#8250;</button>'
+            f'<div class="lb-okvir"><div class="lb-slike" id="lbSlike"></div>'
+            f'<div class="lb-info"><div><h3 id="lbNaslov"></h3><p id="lbOpis"></p></div>'
+            f'<div class="lb-meta"><small>{L["alat"]}</small><span id="lbAlat"></span><span id="lbBroj"></span></div></div>'
+            f'</div></div>'
+            f'<script type="application/json" id="galerija">{galerija_json(jez)}</script>')
 
 
 def faq(jez):
@@ -205,16 +258,19 @@ else if(h.startsWith("viber:"))mgEvent("contact_viber_click");
 else if(h.includes("wa.me/"))mgEvent("contact_whatsapp_click");
 else if(el.dataset.copy)mgEvent("contact_copy_click",{field:el.dataset.copy==="v0"?"email":"phone"});
 else if(el.matches(".ctas .btn-g")&&h.endsWith("#kontakt"))mgEvent("cta_free_quote_click");
-else if(kart)mgEvent("portfolio_click",{project:proj?proj.textContent:"",link_url:el.href});
+else if(kart&&el.tagName==="A")mgEvent("portfolio_click",{project:proj?proj.textContent:"",link_url:el.href});
 else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")});
 else if(el.dataset.filter)mgEvent("portfolio_filter",{filter:el.dataset.filter})});
 </script>
 """ % {"id": GA_ID}
 
 
+PORTFOLIO_JS = open(os.path.join(TU, "portfolio.js"), encoding="utf-8").read()
+
+
 def skripte(jez):
     t = T[jez]
-    return GA + """<script>
+    return GA + "<script>\n" + PORTFOLIO_JS + "</script>" + """<script>
 const C={copy:%s,ok:%s};
 document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{
 const el=document.getElementById(b.dataset.copy);

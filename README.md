@@ -20,7 +20,9 @@ Source of [mechanicallygifted.rs](https://mechanicallygifted.rs), the site for m
 | `dizajn.html` | The design: markup plus the SR/EN text dictionary |
 | `stil.css` | All styles (Geist + Geist Mono) |
 | `napravi-sajt.py` | Builds `sajt/index.html` and `sajt/en/index.html` from the design: puts the right language text into the HTML, adds SEO tags, JSON-LD, contact and portfolio links |
-| `napravi-slike.py` | Renders the share image, Apple icon and portfolio screenshots with headless Chrome, converts to WebP (Pillow) |
+| `napravi-slike.py` | Renders the share image, icons and project screenshots with headless Chrome |
+| `portfolio.py` | Portfolio data (SR/EN, categories, alt texts) and WebP thumbnails (800 px) + gallery images (up to 1800 px) |
+| `portfolio.js` | Portfolio filters and the lightbox gallery (arrows, Esc, click outside, swipe) |
 | `sajt/` | The finished site, deployed to Netlify |
 | `mechanically-gifted-tech.html` | The original single-file design this started from |
 
