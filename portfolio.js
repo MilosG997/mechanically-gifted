@@ -3,11 +3,16 @@
 const G=JSON.parse(podaci.textContent),kartice=[...document.querySelectorAll(".work .case")],R=matchMedia("(prefers-reduced-motion: reduce)").matches;
 let filter="sve";
 // Filteri
+let tajmer=0;
 document.querySelectorAll(".filteri [data-filter]").forEach(b=>b.addEventListener("click",()=>{
 filter=b.dataset.filter;document.querySelectorAll(".filteri [data-filter]").forEach(x=>x.setAttribute("aria-pressed",x===b));
-const vidi=k=>filter==="sve"||k.dataset.kat===filter;
+const vidi=k=>filter==="sve"||k.dataset.cat===filter;
+// 1) kartice koje odlaze kratko izblede, 2) onda nestaju (hidden), a nove ulaze; 3) animacija se uvek završi vidljivo
 kartice.forEach(k=>{if(!vidi(k)&&!k.hidden)k.classList.add("skriva")});
-setTimeout(()=>kartice.forEach(k=>{const v=vidi(k);k.classList.remove("skriva","ulazi");if(v&&k.hidden){k.hidden=false;void k.offsetWidth;k.classList.add("ulazi")}k.hidden=!v}),R?0:200)}));
+clearTimeout(tajmer);
+tajmer=setTimeout(()=>{kartice.forEach(k=>{const v=vidi(k);k.classList.remove("skriva","ulazi");
+if(v&&k.hidden){k.hidden=false;void k.offsetWidth;k.classList.add("ulazi")}k.hidden=!v});
+tajmer=setTimeout(()=>kartice.forEach(k=>k.classList.remove("ulazi")),400)},R?0:200)}));
 // Lightbox
 const lb=document.getElementById("lb"),slike=document.getElementById("lbSlike"),naslov=document.getElementById("lbNaslov"),
 opis=document.getElementById("lbOpis"),alat=document.getElementById("lbAlat"),broj=document.getElementById("lbBroj");

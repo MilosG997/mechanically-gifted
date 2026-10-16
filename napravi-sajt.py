@@ -106,9 +106,10 @@ def portfolio_html(jez):
            "en": {"pogledaj": "View", "dizajn": "View design", "filteri": "Filter projects",
                   "otvori": "Open gallery"}}[jez]
     e = lambda x: html.escape(x, quote=True)
+    ima = {r["kat"] for r in RADOVI}  # dugme samo za kategorije koje imaju bar jedan rad
     filteri = "".join(
         f'<button type="button" data-filter="{k}" aria-pressed="{"true" if k == "sve" else "false"}">'
-        f'{sr if jez == "sr" else en}</button>' for k, sr, en in KATEGORIJE)
+        f'{sr if jez == "sr" else en}</button>' for k, sr, en in KATEGORIJE if k == "sve" or k in ima)
     kartice = []
     for i, r in enumerate(RADOVI):
         naslov = jezik(r["naslov"], jez)
@@ -124,7 +125,7 @@ def portfolio_html(jez):
             dugme = f'<button type="button" class="vise" data-lb="{i}">{rec["dizajn"]}</button>'
         klijent = f'<small class="klijent">{e(jezik(r["klijent"], jez))}</small>' if "klijent" in r else ""
         kartice.append(
-            f'<article class="case" data-kat="{r["kat"]}">'
+            f'<article class="case" data-cat="{r["kat"]}">'
             f'<button type="button" class="shot" data-lb="{i}" aria-label="{rec["otvori"]}: {e(naslov)}">'
             f'{slika}<span>{e(naslov)}</span></button>'
             f'<div class="bd"><div class="chips">{chips}</div>{klijent}<p>{e(opis)}</p>{dugme}</div></article>')
@@ -260,7 +261,7 @@ else if(el.dataset.copy)mgEvent("contact_copy_click",{field:el.dataset.copy==="v
 else if(el.matches(".ctas .btn-g")&&h.endsWith("#kontakt"))mgEvent("cta_free_quote_click");
 else if(kart&&el.tagName==="A")mgEvent("portfolio_click",{project:proj?proj.textContent:"",link_url:el.href});
 else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")});
-else if(el.dataset.filter)mgEvent("portfolio_filter",{filter:el.dataset.filter})});
+else if(el.dataset.filter)mgEvent("portfolio_filter",{filter:el.dataset.filter,filter_name:el.textContent.trim()})});
 </script>
 """ % {"id": GA_ID}
 
