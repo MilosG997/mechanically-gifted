@@ -191,6 +191,15 @@ footer .w{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:
 footer nav{display:flex;flex-wrap:wrap;gap:6px 20px}
 footer a{text-decoration:none}
 footer a:hover{color:var(--fg)}
+
+/* Tekstualne stranice (politika privatnosti) */
+.prose{max-width:760px;display:grid;gap:18px}
+.prose h1{font-size:clamp(34px,5vw,54px);font-weight:700;letter-spacing:-.04em;margin-bottom:6px}
+.prose h2{font-size:22px;font-weight:600;margin-top:22px}
+.prose p,.prose li{color:var(--muted)}
+.prose ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.prose a{color:var(--sky);text-underline-offset:3px}
+.prose .datum{font-family:var(--mono);font-size:12.5px;color:var(--dim)}
 </style>
 </head>
 <body>
@@ -220,7 +229,26 @@ footer a:hover{color:var(--fg)}
 <section id="pitanja"><div class="w"><div class="sh"><div class="eye">Česta pitanja</div><h2>Pitanja o izradi sajta</h2></div><div class="faq"><details open><summary>Koliko košta izrada sajta?</summary><p>Cena zavisi od broja stranica, jezika i funkcija. Posle kratkog razgovora dobijate tačnu cenu unapred.</p></details><details><summary>Koliko traje izrada?</summary><p>Jednostavan sajt je obično gotov za 1 do 2 nedelje. Shopify prodavnica zavisi od broja proizvoda i prilagođavanja teme.</p></details><details><summary>Da li radite za strane klijente?</summary><p>Da. Radim na srpskom i engleskom, sa klijentima iz Srbije i inostranstva.</p></details><details><summary>Šta je QA automatsko testiranje?</summary><p>Programi koji sami prolaze kroz sajt kao kupac i proveravaju korpu, forme i plaćanje posle svake izmene.</p></details></div></div></section>
 <section id="kontakt" class="contact"><div class="w"><div class="box"><div><h2>Zatražite besplatnu procenu projekta</h2><p>Pošaljite kratak opis: šta radite, šta vam treba i do kada. Odgovaram isti dan sa predlogom i okvirnom cenom.</p></div><div class="ch"><div class="c"><div><small>Email</small><span id="v0"><a href="mailto:mechanicallygifted@gmail.com">mechanicallygifted@gmail.com</a></span></div><button type="button" id="b0" data-copy="v0">Kopiraj</button></div><div class="c"><div><small>Telefon · Viber · WhatsApp</small><span id="v1"><a href="tel:+381693329029">+381 69 3329 029</a></span></div><button type="button" id="b1" data-copy="v1">Kopiraj</button></div><div class="apps"><a class="btn btn-l" href="viber://chat?number=%2B381693329029">Viber</a><a class="btn btn-l" href="https://wa.me/381693329029" target="_blank" rel="noopener">WhatsApp</a></div></div></div></div></section>
 </main>
-<footer><div class="w"><span>© 2026 Mechanically Gifted · Izrada sajtova · Shopify · QA testiranje · Srbija</span><nav><a href="mailto:mechanicallygifted@gmail.com">Email</a><a href="https://github.com/MilosG997" target="_blank" rel="noopener">GitHub</a><a href="/en/" hreflang="en" lang="en">English</a></nav></div></footer>
+<footer><div class="w"><span>© 2026 Mechanically Gifted · Izrada sajtova · Shopify · QA testiranje · Srbija</span><nav><a href="mailto:mechanicallygifted@gmail.com">Email</a><a href="https://github.com/MilosG997" target="_blank" rel="noopener">GitHub</a><a href="/en/" hreflang="en" lang="en">English</a><a href="/privatnost/">Privatnost</a></nav></div></footer>
+<script>
+(()=>{if(location.hostname!=="mechanicallygifted.rs")return;
+window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};
+gtag("js",new Date());gtag("config","G-STL2YKYT85",{allow_google_signals:false,allow_ad_personalization_signals:false});
+const ucitaj=()=>{const s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-STL2YKYT85";document.head.appendChild(s)};
+document.readyState==="complete"?ucitaj():addEventListener("load",ucitaj,{once:true})})();
+function mgEvent(ime,param){try{window.gtag&&gtag("event",ime,Object.assign({page_language:document.documentElement.lang},param||{}))}catch(e){}}
+document.addEventListener("click",e=>{const el=e.target.closest("a,button");if(!el)return;
+const h=el.getAttribute("href")||"",kart=el.closest(".case"),proj=kart&&kart.querySelector(".shot span");
+if(h.startsWith("mailto:"))mgEvent("contact_email_click",{link_location:el.closest("footer")?"footer":"contact"});
+else if(h.startsWith("tel:"))mgEvent("contact_phone_click");
+else if(h.startsWith("viber:"))mgEvent("contact_viber_click");
+else if(h.includes("wa.me/"))mgEvent("contact_whatsapp_click");
+else if(el.dataset.copy)mgEvent("contact_copy_click",{field:el.dataset.copy==="v0"?"email":"phone"});
+else if(el.matches(".ctas .btn-g")&&h.endsWith("#kontakt"))mgEvent("cta_free_quote_click");
+else if(kart)mgEvent("portfolio_click",{project:proj?proj.textContent:"",link_url:el.href});
+else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")});
+else if(el.dataset.filter)mgEvent("portfolio_filter",{filter:el.dataset.filter})});
+</script>
 <script>
 const C={copy:"Kopiraj",ok:"Kopirano"};
 document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{

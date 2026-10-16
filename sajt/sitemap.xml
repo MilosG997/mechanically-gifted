@@ -12,4 +12,16 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://mechanicallygifted.rs/en/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://mechanicallygifted.rs/"/>
   </url>
+  <url>
+    <loc>https://mechanicallygifted.rs/privatnost/</loc>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://mechanicallygifted.rs/privatnost/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mechanicallygifted.rs/en/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mechanicallygifted.rs/privatnost/"/>
+  </url>
+  <url>
+    <loc>https://mechanicallygifted.rs/en/privacy/</loc>
+    <xhtml:link rel="alternate" hreflang="sr" href="https://mechanicallygifted.rs/privatnost/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mechanicallygifted.rs/en/privacy/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mechanicallygifted.rs/privatnost/"/>
+  </url>
 </urlset>

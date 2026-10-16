@@ -6,6 +6,9 @@ DOMEN = "https://mechanicallygifted.rs"
 EMAIL = "mechanicallygifted@gmail.com"
 TEL_PRIKAZ = "+381 69 3329 029"
 TEL = "+381693329029"
+GA_ID = "G-STL2YKYT85"
+# Politika privatnosti po jeziku
+PRIVATNOST = {"sr": "/privatnost/", "en": "/en/privacy/"}
 LINKOVI = {
     "Eskay Products": "https://eskayproducts.com/",
     "Tan Ti Studio": "https://tantistudio.netlify.app/",
@@ -85,7 +88,8 @@ def stranica(jez):
                lambda mm: f'<footer><div class="w"><span>{mm.group(1)} · {mm.group(2)}</span><nav>'
                           f'<a href="mailto:{EMAIL}">Email</a>'
                           f'<a href="{LINKOVI["GitHub"]}" target="_blank" rel="noopener">GitHub</a>'
-                          f'{drugi}</nav></div></footer>', b, flags=re.S)
+                          f'{drugi}<a href="{PRIVATNOST[jez]}">{"Privatnost" if jez == "sr" else "Privacy"}</a>'
+                          f'</nav></div></footer>', b, flags=re.S)
     assert "<nav><a href=\"mailto" in b
 
     # Kontakt: mailto, tel, bez LinkedIn-a, Viber i WhatsApp dugmad
@@ -129,8 +133,10 @@ META = {
 }
 
 
-def glava(jez, k=None, noindex=False):
+def glava(jez, k=None, noindex=False, par=("/", "/en/"), ld=None):
+    """par = (srpska putanja, engleska putanja) iste stranice, za hreflang; ld = drugi JSON-LD."""
     k = k or META[jez]
+    ld_strana = ld
     ld = {"@context": "https://schema.org", "@graph": [
         {"@type": "ProfessionalService", "@id": DOMEN + "/#firma", "name": "Mechanically Gifted",
          "url": k["url"], "description": k["usluga"], "email": EMAIL, "telephone": TEL,
@@ -150,9 +156,9 @@ def glava(jez, k=None, noindex=False):
 <title>{e(k["title"])}</title>
 <meta name="description" content="{e(k["desc"])}">{'<meta name="robots" content="noindex">' if noindex else ""}
 <link rel="canonical" href="{k["url"]}">
-<link rel="alternate" hreflang="sr" href="{DOMEN}/">
-<link rel="alternate" hreflang="en" href="{DOMEN}/en/">
-<link rel="alternate" hreflang="x-default" href="{DOMEN}/">
+<link rel="alternate" hreflang="sr" href="{DOMEN}{par[0]}">
+<link rel="alternate" hreflang="en" href="{DOMEN}{par[1]}">
+<link rel="alternate" hreflang="x-default" href="{DOMEN}{par[0]}">
 <meta name="theme-color" content="#050a1a">
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -173,7 +179,7 @@ def glava(jez, k=None, noindex=False):
 <meta name="twitter:title" content="{e(k["title"])}">
 <meta name="twitter:description" content="{e(k["desc"])}">
 <meta name="twitter:image" content="{DOMEN}/og-image.png">
-<script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
+<script type="application/ld+json">{json.dumps(ld if ld_strana is None else ld_strana, ensure_ascii=False)}</script>
 <link rel="preload" href="/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/geist-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>{css}</style>
@@ -182,9 +188,33 @@ def glava(jez, k=None, noindex=False):
 """
 
 
+# GA4 kao na majstoripazova.rs: radi odmah, bez banera; gtag.js se učitava posle prvog prikaza.
+# Prati samo na pravom domenu (ne lokalno). Klikovi se hvataju na jednom mestu (delegirano).
+GA = """<script>
+(()=>{if(location.hostname!=="mechanicallygifted.rs")return;
+window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};
+gtag("js",new Date());gtag("config","%(id)s",{allow_google_signals:false,allow_ad_personalization_signals:false});
+const ucitaj=()=>{const s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=%(id)s";document.head.appendChild(s)};
+document.readyState==="complete"?ucitaj():addEventListener("load",ucitaj,{once:true})})();
+function mgEvent(ime,param){try{window.gtag&&gtag("event",ime,Object.assign({page_language:document.documentElement.lang},param||{}))}catch(e){}}
+document.addEventListener("click",e=>{const el=e.target.closest("a,button");if(!el)return;
+const h=el.getAttribute("href")||"",kart=el.closest(".case"),proj=kart&&kart.querySelector(".shot span");
+if(h.startsWith("mailto:"))mgEvent("contact_email_click",{link_location:el.closest("footer")?"footer":"contact"});
+else if(h.startsWith("tel:"))mgEvent("contact_phone_click");
+else if(h.startsWith("viber:"))mgEvent("contact_viber_click");
+else if(h.includes("wa.me/"))mgEvent("contact_whatsapp_click");
+else if(el.dataset.copy)mgEvent("contact_copy_click",{field:el.dataset.copy==="v0"?"email":"phone"});
+else if(el.matches(".ctas .btn-g")&&h.endsWith("#kontakt"))mgEvent("cta_free_quote_click");
+else if(kart)mgEvent("portfolio_click",{project:proj?proj.textContent:"",link_url:el.href});
+else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")});
+else if(el.dataset.filter)mgEvent("portfolio_filter",{filter:el.dataset.filter})});
+</script>
+""" % {"id": GA_ID}
+
+
 def skripte(jez):
     t = T[jez]
-    return """<script>
+    return GA + """<script>
 const C={copy:%s,ok:%s};
 document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{
 const el=document.getElementById(b.dataset.copy);
@@ -222,16 +252,6 @@ with open(os.path.join(IZLAZ, "favicon.svg"), "w", encoding="utf-8", newline="\n
 with open(os.path.join(IZLAZ, "robots.txt"), "w", encoding="utf-8", newline="\n") as f:
     f.write(f"User-agent: *\nAllow: /\n\nSitemap: {DOMEN}/sitemap.xml\n")
 
-alt = (f'    <xhtml:link rel="alternate" hreflang="sr" href="{DOMEN}/"/>\n'
-       f'    <xhtml:link rel="alternate" hreflang="en" href="{DOMEN}/en/"/>\n'
-       f'    <xhtml:link rel="alternate" hreflang="x-default" href="{DOMEN}/"/>\n')
-with open(os.path.join(IZLAZ, "sitemap.xml"), "w", encoding="utf-8", newline="\n") as f:
-    f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
-            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
-            f'  <url>\n    <loc>{DOMEN}/</loc>\n{alt}  </url>\n'
-            f'  <url>\n    <loc>{DOMEN}/en/</loc>\n{alt}  </url>\n'
-            '</urlset>\n')
-
 # 404 stranice u istom dizajnu (SR na /404.html, EN na /en/404.html — vidi _redirects)
 NE_POSTOJI = {
     "sr": {"title": "Stranica nije pronađena – Mechanically Gifted",
@@ -265,6 +285,79 @@ for jez, put in (("sr", "404.html"), ("en", os.path.join("en", "404.html"))):
                f'{podnozje}\n')
     with open(os.path.join(IZLAZ, put), "w", encoding="utf-8", newline="\n") as f:
         f.write(g + telo404 + skripte(jez))
+
+def okvir(jez, pocetna):
+    """Zaglavlje i podnožje sa početne stranice; meni vodi na sekcije početne."""
+    cela = stranica(jez)
+    zaglavlje = re.search(r"<header>.*?</header>", cela, re.S).group(0).replace('href="#', f'href="{pocetna}#')
+    return zaglavlje, re.search(r"<footer>.*?</footer>", cela, re.S).group(0)
+
+
+def drugi_jezik(zaglavlje, sr_url, en_url):
+    """SR/EN dugme vodi na istu stranicu na drugom jeziku."""
+    zaglavlje = zaglavlje.replace('<a href="/" hreflang="sr"', f'<a href="{sr_url}" hreflang="sr"')
+    return zaglavlje.replace('<a href="/en/" hreflang="en"', f'<a href="{en_url}" hreflang="en"')
+
+
+def zapisi(putanja, sadrzaj):
+    put = os.path.join(IZLAZ, putanja.strip("/"), "index.html")
+    os.makedirs(os.path.dirname(put), exist_ok=True)
+    with open(put, "w", encoding="utf-8", newline="\n") as f:
+        f.write(sadrzaj)
+
+
+# Politika privatnosti: kratko, samo link u podnožju
+POLITIKA = {
+    "sr": {"title": "Politika privatnosti – Mechanically Gifted",
+           "desc": "Kako sajt mechanicallygifted.rs koristi Google Analytics i podatke iz kontakt forme.",
+           "html": """<div class="datum">Važi od 16.10.2026.</div>
+<h1>Politika privatnosti</h1>
+<p>Sajt mechanicallygifted.rs vodi Mechanically Gifted. Za sva pitanja o podacima pišite na <a href="mailto:{email}">{email}</a>.</p>
+<h2>Google Analytics</h2>
+<p>Sajt koristi Google Analytics 4 da bih video koliko ljudi poseti sajt i šta ih zanima. Google pri tome beleži:</p>
+<ul><li>koje stranice ste otvorili i koliko dugo ste ostali,</li><li>klikove na kontakt (email, telefon, Viber, WhatsApp) i na projekte,</li><li>vrstu uređaja i pregledača i okvirnu lokaciju (grad ili zemlju),</li><li>odakle ste došli (npr. Google pretraga ili link).</li></ul>
+<p>Google Analytics za to koristi kolačiće (_ga). Ne vidim vaše ime ni IP adresu i podatke ne koristim za reklame. Podatke obrađuje Google, više na <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>. Praćenje možete isključiti dodatkom za pregledač <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics Opt-out</a> ili brisanjem kolačića.</p>
+<h2>Kontakt forma i poruke</h2>
+<p>Kada mi pošaljete poruku preko forme, emaila, Vibera ili WhatsApp-a, podatke koje upišete (ime, email, opis posla, budžet) koristim samo da vam odgovorim i pripremim ponudu. Poruke iz forme čuva Netlify, servis na kom je sajt. Podatke ne prodajem i ne delim ni sa kim.</p>
+<h2>Vaša prava</h2>
+<p>Možete tražiti da vidite, ispravite ili obrišete podatke koje imam o vama: pišite na <a href="mailto:{email}">{email}</a>.</p>"""},
+    "en": {"title": "Privacy policy – Mechanically Gifted",
+           "desc": "How mechanicallygifted.rs uses Google Analytics and the data you send through the contact form.",
+           "html": """<div class="datum">Effective 16 October 2026</div>
+<h1>Privacy policy</h1>
+<p>mechanicallygifted.rs is run by Mechanically Gifted. For any question about your data, email <a href="mailto:{email}">{email}</a>.</p>
+<h2>Google Analytics</h2>
+<p>This site uses Google Analytics 4 to see how many people visit and what they are interested in. Google records:</p>
+<ul><li>which pages you open and how long you stay,</li><li>clicks on contact links (email, phone, Viber, WhatsApp) and on projects,</li><li>device and browser type and approximate location (city or country),</li><li>where you came from (for example Google search or a link).</li></ul>
+<p>Google Analytics uses cookies (_ga) for this. I do not see your name or IP address and do not use the data for advertising. The data is processed by Google, see <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>. You can turn tracking off with the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics Opt-out</a> browser add-on or by deleting cookies.</p>
+<h2>Contact form and messages</h2>
+<p>When you send me a message through the form, email, Viber or WhatsApp, I use what you enter (name, email, project description, budget) only to reply and prepare a quote. Form submissions are stored by Netlify, the service that hosts this site. I do not sell or share your data.</p>
+<h2>Your rights</h2>
+<p>You can ask to see, correct or delete the data I have about you: email <a href="mailto:{email}">{email}</a>.</p>"""},
+}
+for jez in ("sr", "en"):
+    n = POLITIKA[jez]
+    k = dict(META[jez], title=n["title"], desc=n["desc"], url=DOMEN + PRIVATNOST[jez])
+    ld = {"@context": "https://schema.org", "@type": "WebPage", "name": n["title"], "url": k["url"],
+          "inLanguage": jez, "isPartOf": {"@id": DOMEN + "/#firma"}}
+    g = glava(jez, k, par=(PRIVATNOST["sr"], PRIVATNOST["en"]), ld=ld)
+    zaglavlje, podnozje = okvir(jez, "/" if jez == "sr" else "/en/")
+    zaglavlje = drugi_jezik(zaglavlje, PRIVATNOST["sr"], PRIVATNOST["en"])
+    zapisi(PRIVATNOST[jez], g + f'{zaglavlje}\n<main id="top"><section><div class="w"><article class="prose">'
+           f'{n["html"].format(email=EMAIL)}</article></div></section></main>\n{podnozje}\n' + skripte(jez))
+
+# Sitemap: sve javne stranice u parovima (sr, en) sa hreflang
+PAROVI = [("/", "/en/"), (PRIVATNOST["sr"], PRIVATNOST["en"])]
+with open(os.path.join(IZLAZ, "sitemap.xml"), "w", encoding="utf-8", newline="\n") as f:
+    f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
+            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n')
+    for sr, en in PAROVI:
+        alt = (f'    <xhtml:link rel="alternate" hreflang="sr" href="{DOMEN}{sr}"/>\n'
+               f'    <xhtml:link rel="alternate" hreflang="en" href="{DOMEN}{en}"/>\n'
+               f'    <xhtml:link rel="alternate" hreflang="x-default" href="{DOMEN}{sr}"/>\n')
+        for u in (sr, en):
+            f.write(f'  <url>\n    <loc>{DOMEN}{u}</loc>\n{alt}  </url>\n')
+    f.write('</urlset>\n')
 
 # Netlify: preusmerenja, zaglavlja, manifest
 with open(os.path.join(IZLAZ, "_redirects"), "w", encoding="utf-8", newline="\n") as f:

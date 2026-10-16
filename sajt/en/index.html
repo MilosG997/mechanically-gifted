@@ -191,6 +191,15 @@ footer .w{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:
 footer nav{display:flex;flex-wrap:wrap;gap:6px 20px}
 footer a{text-decoration:none}
 footer a:hover{color:var(--fg)}
+
+/* Tekstualne stranice (politika privatnosti) */
+.prose{max-width:760px;display:grid;gap:18px}
+.prose h1{font-size:clamp(34px,5vw,54px);font-weight:700;letter-spacing:-.04em;margin-bottom:6px}
+.prose h2{font-size:22px;font-weight:600;margin-top:22px}
+.prose p,.prose li{color:var(--muted)}
+.prose ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.prose a{color:var(--sky);text-underline-offset:3px}
+.prose .datum{font-family:var(--mono);font-size:12.5px;color:var(--dim)}
 </style>
 </head>
 <body>
@@ -220,7 +229,26 @@ footer a:hover{color:var(--fg)}
 <section id="pitanja"><div class="w"><div class="sh"><div class="eye">FAQ</div><h2>Questions about getting a website</h2></div><div class="faq"><details open><summary>How much does a website cost?</summary><p>It depends on pages, languages and features. After a short call you get an exact price up front.</p></details><details><summary>How long does it take?</summary><p>A simple site is usually done in 1 to 2 weeks. A Shopify store depends on the number of products and theme work.</p></details><details><summary>Do you work with international clients?</summary><p>Yes. I work in English and Serbian, with clients in Serbia and abroad.</p></details><details><summary>What is QA test automation?</summary><p>Programs that go through your site like a customer and check the cart, forms and checkout after every change.</p></details></div></div></section>
 <section id="kontakt" class="contact"><div class="w"><div class="box"><div><h2>Get a free project quote</h2><p>Send a short description: what you do, what you need and by when. I reply the same day with a proposal and a ballpark price.</p></div><div class="ch"><div class="c"><div><small>Email</small><span id="v0"><a href="mailto:mechanicallygifted@gmail.com">mechanicallygifted@gmail.com</a></span></div><button type="button" id="b0" data-copy="v0">Copy</button></div><div class="c"><div><small>Phone · Viber · WhatsApp</small><span id="v1"><a href="tel:+381693329029">+381 69 3329 029</a></span></div><button type="button" id="b1" data-copy="v1">Copy</button></div><div class="apps"><a class="btn btn-l" href="viber://chat?number=%2B381693329029">Viber</a><a class="btn btn-l" href="https://wa.me/381693329029" target="_blank" rel="noopener">WhatsApp</a></div></div></div></div></section>
 </main>
-<footer><div class="w"><span>© 2026 Mechanically Gifted · Shopify developer · Web design · QA automation · Serbia</span><nav><a href="mailto:mechanicallygifted@gmail.com">Email</a><a href="https://github.com/MilosG997" target="_blank" rel="noopener">GitHub</a><a href="/" hreflang="sr" lang="sr">Srpski</a></nav></div></footer>
+<footer><div class="w"><span>© 2026 Mechanically Gifted · Shopify developer · Web design · QA automation · Serbia</span><nav><a href="mailto:mechanicallygifted@gmail.com">Email</a><a href="https://github.com/MilosG997" target="_blank" rel="noopener">GitHub</a><a href="/" hreflang="sr" lang="sr">Srpski</a><a href="/en/privacy/">Privacy</a></nav></div></footer>
+<script>
+(()=>{if(location.hostname!=="mechanicallygifted.rs")return;
+window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments)};
+gtag("js",new Date());gtag("config","G-STL2YKYT85",{allow_google_signals:false,allow_ad_personalization_signals:false});
+const ucitaj=()=>{const s=document.createElement("script");s.async=true;s.src="https://www.googletagmanager.com/gtag/js?id=G-STL2YKYT85";document.head.appendChild(s)};
+document.readyState==="complete"?ucitaj():addEventListener("load",ucitaj,{once:true})})();
+function mgEvent(ime,param){try{window.gtag&&gtag("event",ime,Object.assign({page_language:document.documentElement.lang},param||{}))}catch(e){}}
+document.addEventListener("click",e=>{const el=e.target.closest("a,button");if(!el)return;
+const h=el.getAttribute("href")||"",kart=el.closest(".case"),proj=kart&&kart.querySelector(".shot span");
+if(h.startsWith("mailto:"))mgEvent("contact_email_click",{link_location:el.closest("footer")?"footer":"contact"});
+else if(h.startsWith("tel:"))mgEvent("contact_phone_click");
+else if(h.startsWith("viber:"))mgEvent("contact_viber_click");
+else if(h.includes("wa.me/"))mgEvent("contact_whatsapp_click");
+else if(el.dataset.copy)mgEvent("contact_copy_click",{field:el.dataset.copy==="v0"?"email":"phone"});
+else if(el.matches(".ctas .btn-g")&&h.endsWith("#kontakt"))mgEvent("cta_free_quote_click");
+else if(kart)mgEvent("portfolio_click",{project:proj?proj.textContent:"",link_url:el.href});
+else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")});
+else if(el.dataset.filter)mgEvent("portfolio_filter",{filter:el.dataset.filter})});
+</script>
 <script>
 const C={copy:"Copy",ok:"Copied"};
 document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{
