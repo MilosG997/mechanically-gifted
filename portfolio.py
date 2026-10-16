@@ -27,12 +27,7 @@ RADOVI = [
      "alt": {"sr": "Terminal sa rezultatima Selenium testova koji su prošli",
              "en": "Terminal showing passing Selenium test results"},
      "izvor": [("snimci", "qa", None)]},
-    {"slug": "tan-ti-studio", "kat": "sajtovi", "naslov": "Tan Ti Studio", "chips": [{"sr": "Sajt", "en": "Website"}, "SEO"],
-     "link": "https://tantistudio.netlify.app/", "alat": "HTML · CSS · JavaScript",
-     "opis_kljuc": "w2.d",
-     "alt": {"sr": "Početna stranica sajta Tan Ti Studio u bež i braon tonovima",
-             "en": "Tan Ti Studio website home page in beige and brown tones"},
-     "izvor": [("snimci", "tanti", (0, 0, 760))]},
+    # Tan Ti Studio: skinut dok sajt ne bude završen (vraća se odavde, slike ostaju u izvor-slika)
     # Dizajni iz Figme (freelance)
     {"slug": "shopnosis", "kat": "dizajn", "naslov": "Shopnosis",
      "opis": {"sr": "Landing stranica za platformu koja meri efekat reklama u prodavnicama.",
