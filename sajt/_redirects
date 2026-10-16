@@ -1,0 +1,6 @@
+# www i stara netlify.app adresa -> glavni domen
+https://www.mechanicallygifted.rs/*  https://mechanicallygifted.rs/:splat  301!
+http://www.mechanicallygifted.rs/*   https://mechanicallygifted.rs/:splat  301!
+https://mechanicallygifted.netlify.app/*  https://mechanicallygifted.rs/:splat  301!
+# engleska 404 stranica za sve što ne postoji pod /en/
+/en/*  /en/404.html  404

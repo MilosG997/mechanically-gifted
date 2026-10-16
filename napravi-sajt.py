@@ -3,7 +3,7 @@
 import html, json, os, re
 
 DOMEN = "https://mechanicallygifted.rs"
-EMAIL = "milosnpcz97@gmail.com"
+EMAIL = "mechanicallygifted@gmail.com"
 TEL_PRIKAZ = "+381 69 3329 029"
 TEL = "+381693329029"
 LINKOVI = {
@@ -25,7 +25,17 @@ izvor = open(os.path.join(TU, "dizajn.html"), encoding="utf-8").read()
 m = re.search(r"const T=\{en:(\{.*?\}),sr:(\{.*?\})\};", izvor, re.S)
 T = {"en": json.loads(m.group(1)), "sr": json.loads(m.group(2))}
 
-css = open(os.path.join(TU, "stil.css"), encoding="utf-8").read()
+# Fontovi su na našem serveru (sajt/fonts, OFL licenca) — brže od Google Fonts i keširaju se
+LAT = ("U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,"
+       "U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD")
+LAT_EXT = ("U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,"
+           "U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF")
+FONTOVI = "".join(
+    f'@font-face{{font-family:"{ime}";font-style:normal;font-weight:100 900;font-display:swap;'
+    f'src:url(/fonts/{fajl}-{deo}-wght-normal.woff2) format("woff2");unicode-range:{opseg}}}\n'
+    for ime, fajl in (("Geist", "geist"), ("Geist Mono", "geist-mono"))
+    for deo, opseg in (("latin", LAT), ("latin-ext", LAT_EXT)))
+css = FONTOVI + open(os.path.join(TU, "stil.css"), encoding="utf-8").read()
 
 telo = re.search(r"(<header>.*?</footer>)", izvor, re.S).group(1)
 # "</>" se u HTML-u ne prikazuje (parser ga baci) — ikonica Shopify kartice je bila prazna
@@ -119,14 +129,15 @@ META = {
 }
 
 
-def glava(jez):
-    k = META[jez]
+def glava(jez, k=None, noindex=False):
+    k = k or META[jez]
     ld = {"@context": "https://schema.org", "@graph": [
         {"@type": "ProfessionalService", "@id": DOMEN + "/#firma", "name": "Mechanically Gifted",
          "url": k["url"], "description": k["usluga"], "email": EMAIL, "telephone": TEL,
-         "logo": DOMEN + "/apple-touch-icon.png", "image": DOMEN + "/og-image.png",
+         "logo": DOMEN + "/icon-512.png", "image": DOMEN + "/og-image.png",
          "address": {"@type": "PostalAddress", "addressCountry": "RS"},
-         "areaServed": ["Srbija", "Europe"] if jez == "sr" else ["Serbia", "Europe"],
+         "areaServed": [{"@type": "Country", "name": "Srbija" if jez == "sr" else "Serbia"},
+                        {"@type": "Place", "name": "Inostranstvo" if jez == "sr" else "Worldwide"}],
          "knowsLanguage": ["sr", "en"], "sameAs": [LINKOVI["GitHub"]]},
         {"@type": "FAQPage", "@id": k["url"] + "#pitanja", "inLanguage": jez, "mainEntity": faq(jez)},
     ]}
@@ -137,14 +148,16 @@ def glava(jez):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{e(k["title"])}</title>
-<meta name="description" content="{e(k["desc"])}">
+<meta name="description" content="{e(k["desc"])}">{'<meta name="robots" content="noindex">' if noindex else ""}
 <link rel="canonical" href="{k["url"]}">
 <link rel="alternate" hreflang="sr" href="{DOMEN}/">
 <link rel="alternate" hreflang="en" href="{DOMEN}/en/">
 <link rel="alternate" hreflang="x-default" href="{DOMEN}/">
 <meta name="theme-color" content="#050a1a">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Mechanically Gifted">
 <meta property="og:title" content="{e(k["title"])}">
@@ -161,8 +174,8 @@ def glava(jez):
 <meta name="twitter:description" content="{e(k["desc"])}">
 <meta name="twitter:image" content="{DOMEN}/og-image.png">
 <script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;650;700&family=Geist+Mono:wght@400;500;600&display=swap">
+<link rel="preload" href="/fonts/geist-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/geist-mono-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>{css}</style>
 </head>
 <body>
@@ -218,5 +231,69 @@ with open(os.path.join(IZLAZ, "sitemap.xml"), "w", encoding="utf-8", newline="\n
             f'  <url>\n    <loc>{DOMEN}/</loc>\n{alt}  </url>\n'
             f'  <url>\n    <loc>{DOMEN}/en/</loc>\n{alt}  </url>\n'
             '</urlset>\n')
+
+# 404 stranice u istom dizajnu (SR na /404.html, EN na /en/404.html — vidi _redirects)
+NE_POSTOJI = {
+    "sr": {"title": "Stranica nije pronađena – Mechanically Gifted",
+           "desc": "Ova stranica ne postoji ili je premeštena.",
+           "h1": "Ova stranica ne postoji", "eye": "Greška 404",
+           "p": "Link je možda pogrešan ili je stranica premeštena. Vratite se na početnu ili mi pišite direktno.",
+           "home": "Nazad na početnu", "home_url": "/", "kontakt": "Kontakt", "kontakt_url": "/#kontakt"},
+    "en": {"title": "Page not found – Mechanically Gifted",
+           "desc": "This page does not exist or has been moved.",
+           "h1": "This page doesn't exist", "eye": "Error 404",
+           "p": "The link may be wrong or the page has moved. Go back to the home page or contact me directly.",
+           "home": "Back to home", "home_url": "/en/", "kontakt": "Contact", "kontakt_url": "/en/#kontakt"},
+}
+for jez, put in (("sr", "404.html"), ("en", os.path.join("en", "404.html"))):
+    n = NE_POSTOJI[jez]
+    k = dict(META[jez], title=n["title"], desc=n["desc"])
+    g = glava(jez, k, noindex=True)
+    # 404 nema canonical, hreflang ni strukturirane podatke
+    g = re.sub(r'<link rel="(canonical|alternate)"[^>]*>\n', "", g)
+    g = re.sub(r'<script type="application/ld\+json">.*?</script>\n', "", g, flags=re.S)
+    cela = stranica(jez)
+    zaglavlje = re.search(r"<header>.*?</header>", cela, re.S).group(0)
+    # linkovi iz menija vode na početnu stranicu jezika
+    zaglavlje = zaglavlje.replace('href="#', f'href="{n["home_url"]}#')
+    podnozje = re.search(r"<footer>.*?</footer>", cela, re.S).group(0)
+    telo404 = (f'{zaglavlje}\n<main id="top"><div class="hero"><canvas id="net" aria-hidden="true"></canvas>'
+               f'<div class="w"><div class="eye">{n["eye"]}</div><h1>{n["h1"]}</h1>'
+               f'<p class="lede">{n["p"]}</p><div class="ctas">'
+               f'<a class="btn btn-g" href="{n["home_url"]}">{n["home"]}</a>'
+               f'<a class="btn btn-l" href="{n["kontakt_url"]}">{n["kontakt"]}</a></div></div></div></main>\n'
+               f'{podnozje}\n')
+    with open(os.path.join(IZLAZ, put), "w", encoding="utf-8", newline="\n") as f:
+        f.write(g + telo404 + skripte(jez))
+
+# Netlify: preusmerenja, zaglavlja, manifest
+with open(os.path.join(IZLAZ, "_redirects"), "w", encoding="utf-8", newline="\n") as f:
+    f.write(f"# www i stara netlify.app adresa -> glavni domen\n"
+            f"https://www.mechanicallygifted.rs/*  {DOMEN}/:splat  301!\n"
+            f"http://www.mechanicallygifted.rs/*   {DOMEN}/:splat  301!\n"
+            f"https://mechanicallygifted.netlify.app/*  {DOMEN}/:splat  301!\n"
+            f"# engleska 404 stranica za sve što ne postoji pod /en/\n"
+            f"/en/*  /en/404.html  404\n")
+
+with open(os.path.join(IZLAZ, "_headers"), "w", encoding="utf-8", newline="\n") as f:
+    f.write("/*\n"
+            "  X-Content-Type-Options: nosniff\n"
+            "  X-Frame-Options: DENY\n"
+            "  Referrer-Policy: strict-origin-when-cross-origin\n"
+            "  Permissions-Policy: camera=(), microphone=(), geolocation=()\n"
+            "\n/fonts/*\n  Cache-Control: public, max-age=31536000, immutable\n"
+            "\n/img/*\n  Cache-Control: public, max-age=2592000\n"
+            "\n/*.png\n  Cache-Control: public, max-age=2592000\n"
+            "\n/*.ico\n  Cache-Control: public, max-age=2592000\n"
+            "\n/favicon.svg\n  Cache-Control: public, max-age=2592000\n"
+            "\n/site.webmanifest\n  Content-Type: application/manifest+json\n")
+
+with open(os.path.join(IZLAZ, "site.webmanifest"), "w", encoding="utf-8", newline="\n") as f:
+    json.dump({"name": "Mechanically Gifted", "short_name": "MG", "start_url": "/", "display": "browser",
+               "background_color": "#050a1a", "theme_color": "#050a1a",
+               "icons": [{"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"},
+                         {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png"},
+                         {"src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml"}]},
+              f, ensure_ascii=False, indent=2)
 
 print("Gotovo:", IZLAZ)

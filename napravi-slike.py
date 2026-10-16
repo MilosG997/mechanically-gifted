@@ -23,7 +23,19 @@ def fajl(ime):
 
 
 snimi(fajl("og.html"), os.path.join(SAJT, "og-image.png"), 1200, 630)
-snimi(fajl("ikonica.html"), os.path.join(SAJT, "apple-touch-icon.png"), 180, 180)
+# Ikonice iz jednog snimka 512x512: Apple (180), manifest (192, 512) i favicon.ico (16/32/48)
+ikona = os.path.join(IZVOR, "snimci", "ikonica-512.png")
+snimi(fajl("ikonica.html"), ikona, 512, 512)
+velika = Image.open(ikona).convert("RGB")
+for ime, v in (("apple-touch-icon.png", 180), ("icon-192.png", 192), ("icon-512.png", 512)):
+    velika.resize((v, v), Image.LANCZOS).save(os.path.join(SAJT, ime), optimize=True)
+# favicon.ico ima zaobljene uglove kao favicon.svg
+from PIL import ImageDraw
+maska = Image.new("L", (512, 512), 0)
+ImageDraw.Draw(maska).rounded_rectangle((0, 0, 511, 511), radius=128, fill=255)
+zaobljena = velika.convert("RGBA")
+zaobljena.putalpha(maska)
+zaobljena.save(os.path.join(SAJT, "favicon.ico"), sizes=[(16, 16), (32, 32), (48, 48)])
 
 # Isečak (levo, gore, širina) — Tan Ti: bez prazne naslovne slike; Majstori: srednja kolona
 ISECAK = {"tanti": (0, 0, 760), "majstori": (300, 0, 680)}
