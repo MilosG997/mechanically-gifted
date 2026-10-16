@@ -279,7 +279,8 @@ const ok=()=>{b.textContent=C.ok;setTimeout(()=>b.textContent=C.copy,1600)};
 const sel=()=>{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)};
 try{navigator.clipboard.writeText(el.textContent).then(ok,sel)}catch(e){sel()}}));
 </script><script>
-(()=>{const c=document.getElementById("net");if(!c)return;const x=c.getContext("2d");let W=0,H,P=[],vid=true,radi=false;const R=matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Animirana mreža: u hederu (#net) i iza kontakt bloka (.mreza); svaka radi samo dok je na ekranu
+document.querySelectorAll("#net, canvas.mreza").forEach(c=>{const x=c.getContext("2d");let W=0,H,P=[],vid=true,radi=false;const R=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function size(){const r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);if(r.width===W&&P.length)return;W=r.width;H=r.height;c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);
 const mali=W<600,n=Math.round(Math.min(mali?36:90,W*H/(mali?16000:14000)));P=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.4+.8}));draw()}
 function draw(){x.clearRect(0,0,W,H);const D=W<600?120:150;
@@ -289,7 +290,7 @@ function step(){if(!vid||document.hidden){radi=false;return}for(const p of P){p.
 function kreni(){if(!R&&!radi&&vid&&!document.hidden){radi=true;requestAnimationFrame(step)}}
 addEventListener("resize",size);size();
 if("IntersectionObserver"in window)new IntersectionObserver(e=>{vid=e[0].isIntersecting;kreni()}).observe(c);
-document.addEventListener("visibilitychange",kreni);kreni()})();
+document.addEventListener("visibilitychange",kreni);kreni()});
 </script>
 </body>
 </html>
