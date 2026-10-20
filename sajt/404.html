@@ -132,23 +132,41 @@ section + section{border-top:1px solid var(--line)}
 .step h3{font-size:19px;font-weight:600;margin-top:10px}
 .step p{color:var(--muted);font-size:15.5px}
 
-/* Radovi */
-.work{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-@media (max-width:760px){.work{grid-template-columns:1fr}}
-.case{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--bg2);display:grid;grid-template-rows:auto 1fr;transition:transform .3s var(--ease),border-color .3s,box-shadow .3s;position:relative}
-.case:hover{transform:translateY(-4px);border-color:rgba(89,195,255,.45);box-shadow:0 24px 60px -30px rgba(47,91,255,.6)}
-.shot{all:unset;box-sizing:border-box;cursor:zoom-in;width:100%;position:relative;aspect-ratio:16/9;overflow:hidden;background:linear-gradient(135deg,rgba(47,91,255,.55),rgba(89,195,255,.25));border-bottom:1px solid var(--line);display:flex;align-items:flex-end;padding:18px 22px;font-family:var(--display);font-weight:650;font-size:26px;letter-spacing:-.03em;color:#fff}
-.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transition:transform .6s var(--ease)}
-.case:hover .shot img{transform:scale(1.03)}
-.shot::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,10,26,.1) 15%,rgba(5,10,26,.93) 92%)}
-.shot span{position:relative;z-index:1;text-shadow:0 2px 12px rgba(0,0,0,.5)}
-.case .bd{padding:22px 24px 24px;display:grid;gap:12px;align-content:start}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{font-family:var(--mono);font-size:11px;font-weight:500;padding:4px 10px;border-radius:999px;background:rgba(89,195,255,.08);border:1px solid rgba(89,195,255,.18);color:var(--sky)}
-.case p{color:var(--muted);font-size:15.5px}
-.case a,.case .vise{all:unset;cursor:pointer;color:var(--sky);font-weight:600;font-size:14.5px;text-decoration:none;justify-self:start;margin-top:2px}
-.case a::after,.case .vise::after{content:"→";display:inline-block;margin-left:6px;transition:transform .2s var(--ease)}
-.case a:hover::after,.case .vise:hover::after{transform:translateX(3px)}
+/* Radovi: četiri foldera (odobren demo "portfolio-folderi"); otvaranje jednog spušta njegove stavke kao listu */
+.folders{display:grid;gap:14px;max-width:960px}
+.f{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));overflow:hidden;transition:border-color .3s}
+.f.open{border-color:rgba(89,195,255,.45)}
+.f .head{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:16px;padding:18px 20px}
+.f .head:focus-visible{outline:2px solid var(--sky);outline-offset:-2px;border-radius:18px}
+.f .ico{flex:none;width:52px;height:42px;position:relative;margin:0;background:none;box-shadow:none;border-radius:0;display:block}
+.f .ico svg{width:100%;height:100%;overflow:visible}
+.f .ico .back{fill:#1d3cc9}
+.f .ico .front{fill:url(#mgFolder);transform-origin:50% 100%;transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
+.f.open .ico .front{transform:perspective(200px) rotateX(-38deg)}
+.f .ico .paper{fill:#dfe9ff;transition:transform .45s .05s}
+.f.open .ico .paper{transform:translateY(-7px)}
+.f .t{flex:1;min-width:0;display:grid}
+.f .t b{font-family:var(--display);font-weight:600;font-size:20px;line-height:1.2;letter-spacing:-.02em}
+.f .t span{color:var(--muted);font-size:14px}
+.f .cnt{font-family:var(--mono);font-size:12px;padding:5px 10px;border-radius:999px;background:rgba(89,195,255,.1);color:var(--sky);flex:none}
+.f .chev{flex:none;width:22px;height:22px;transition:transform .35s;color:var(--muted)}
+.f.open .chev{transform:rotate(180deg);color:var(--sky)}
+.f .body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s ease}
+.f.open .body{grid-template-rows:1fr}
+.f .inner{overflow:hidden;min-height:0}
+.f .list{display:grid;gap:10px;padding:0 20px 20px}
+.f .item{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center;padding:12px;border-radius:14px;background:rgba(5,10,26,.6);border:1px solid var(--line);opacity:0;transform:translateY(-12px);transition:opacity .35s,transform .35s}
+.f.open .item{opacity:1;transform:none}
+.f.open .item:nth-child(2){transition-delay:.06s}.f.open .item:nth-child(3){transition-delay:.12s}.f.open .item:nth-child(4){transition-delay:.18s}.f.open .item:nth-child(5){transition-delay:.24s}.f.open .item:nth-child(n+6){transition-delay:.3s}
+@media (max-width:540px){.f .item{grid-template-columns:96px minmax(0,1fr)}.f .head{gap:12px;padding:16px}.f .list{padding:0 12px 12px}}
+.f .thumb{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top center;border-radius:10px;background:linear-gradient(135deg,rgba(47,91,255,.6),rgba(89,195,255,.25))}
+.f .item h3{margin:0;font-family:var(--display);font-weight:600;font-size:17px;line-height:1.25;letter-spacing:-.01em}
+.f .item p{margin:2px 0 6px;color:var(--muted);font-size:14.5px}
+.f .oznaka{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--dim);margin-top:2px}
+.f .item a,.f .item .vise{all:unset;cursor:pointer;color:var(--sky);font-size:13.5px;font-weight:600;text-decoration:none}
+.f .item a::after,.f .item .vise::after{content:" →"}
+.f .item a:focus-visible,.f .item .vise:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){.f *,.f{transition:none!important}.f .item{opacity:1;transform:none}}
 
 /* Pitanja */
 .faq{display:grid;gap:10px;max-width:860px}
@@ -201,21 +219,7 @@ footer a:hover{color:var(--fg)}
 .prose a{color:var(--sky);text-underline-offset:3px}
 .prose .datum{font-family:var(--mono);font-size:12.5px;color:var(--dim)}
 
-/* Portfolio: filteri, kartice, animacija */
-.shot:focus-visible,.case a:focus-visible,.case .vise:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:6px}
-.shot:focus-visible{outline-offset:-3px;border-radius:20px 20px 0 0}
-.filteri{display:flex;flex-wrap:wrap;gap:8px;margin:-16px 0 28px}
-.filteri button{all:unset;cursor:pointer;font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:.02em;padding:9px 16px;border-radius:999px;border:1px solid var(--line2);color:var(--muted);background:var(--glass);transition:color .2s,border-color .2s,background .2s}
-.filteri button:hover{color:var(--fg);border-color:var(--sky)}
-.filteri button[aria-pressed="true"]{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--royal),var(--sky))}
-.filteri button:focus-visible{outline:2px solid var(--sky);outline-offset:3px}
-@media (max-width:520px){.filteri{flex-wrap:nowrap;overflow-x:auto;margin-inline:-20px;padding:2px 20px 6px;scrollbar-width:none}.filteri::-webkit-scrollbar{display:none}.filteri button{flex:none}}
-.case{transition:transform .3s var(--ease),border-color .3s,box-shadow .3s,opacity .25s var(--ease)}
-.case.skriva{opacity:0;transform:scale(.97)}
-.case.ulazi{animation:ulazi .35s var(--ease) both}
 @keyframes ulazi{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.case.ulazi{animation:none}}
-.klijent{font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.04em;margin-top:-4px}
 
 /* Lightbox galerija */
 .lb{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px));background:rgba(3,7,22,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
@@ -229,7 +233,6 @@ footer a:hover{color:var(--fg)}
 .lb-info h3{font-size:21px;font-weight:600}
 .lb-info p{color:var(--muted);font-size:15px;margin-top:4px;max-width:62ch}
 .lb-meta{display:grid;gap:2px;text-align:right;font-family:var(--mono);font-size:12.5px;color:var(--fg)}
-.lb-meta small{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
 #lbBroj{color:var(--dim);margin-top:6px}
 .lb-x,.lb-nav{all:unset;cursor:pointer;position:fixed;z-index:51;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:rgba(8,17,42,.85);border:1px solid var(--line2);color:#fff;font-size:28px;line-height:1;transition:background .2s,border-color .2s}
 .lb-x:hover,.lb-nav:hover{border-color:var(--sky);background:rgba(47,91,255,.35)}
@@ -272,60 +275,59 @@ const ucitaj=()=>{const s=document.createElement("script");s.async=true;s.src="h
 document.readyState==="complete"?ucitaj():addEventListener("load",ucitaj,{once:true})})();
 function mgEvent(ime,param){try{window.gtag&&gtag("event",ime,Object.assign({page_language:document.documentElement.lang},param||{}))}catch(e){}}
 document.addEventListener("click",e=>{const el=e.target.closest("a,button");if(!el)return;
-const h=el.getAttribute("href")||"",kart=el.closest(".case"),proj=kart&&kart.querySelector(".shot span");
+const h=el.getAttribute("href")||"",stavka=el.closest(".folders .item");
 if(h.startsWith("mailto:"))mgEvent("contact_email_click",{link_location:el.closest("footer")?"footer":"contact"});
 else if(h.startsWith("tel:"))mgEvent("contact_phone_click");
 else if(h.startsWith("viber:"))mgEvent("contact_viber_click");
 else if(h.includes("wa.me/"))mgEvent("contact_whatsapp_click");
 else if(el.dataset.copy)mgEvent("contact_copy_click",{field:el.dataset.copy==="v0"?"email":"phone"});
 else if(el.matches(".ctas .btn-g")&&h.endsWith("#kontakt"))mgEvent("cta_free_quote_click");
-else if(kart&&el.tagName==="A")mgEvent("portfolio_click",{project:proj?proj.textContent:"",link_url:el.href});
-else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")});
-else if(el.dataset.filter)mgEvent("portfolio_filter",{filter:el.dataset.filter,filter_name:el.textContent.trim()})});
+else if(stavka)mgEvent("portfolio_item_click",{item_name:stavka.querySelector("h3").textContent,link_url:el.href||""});
+else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")})});
 </script>
 <script>
-// Portfolio: filteri bez učitavanja stranice + lightbox galerija (strelice, Esc, klik van slike, swipe).
-(()=>{const podaci=document.getElementById("galerija");if(!podaci)return;
-const G=JSON.parse(podaci.textContent),kartice=[...document.querySelectorAll(".work .case")],R=matchMedia("(prefers-reduced-motion: reduce)").matches;
-let filter="sve";
-// Filteri
-let tajmer=0;
-document.querySelectorAll(".filteri [data-filter]").forEach(b=>b.addEventListener("click",()=>{
-filter=b.dataset.filter;document.querySelectorAll(".filteri [data-filter]").forEach(x=>x.setAttribute("aria-pressed",x===b));
-const vidi=k=>filter==="sve"||k.dataset.cat===filter;
-// 1) kartice koje odlaze kratko izblede, 2) onda nestaju (hidden), a nove ulaze; 3) animacija se uvek završi vidljivo
-kartice.forEach(k=>{if(!vidi(k)&&!k.hidden)k.classList.add("skriva")});
-clearTimeout(tajmer);
-tajmer=setTimeout(()=>{kartice.forEach(k=>{const v=vidi(k);k.classList.remove("skriva","ulazi");
-if(v&&k.hidden){k.hidden=false;void k.offsetWidth;k.classList.add("ulazi")}k.hidden=!v});
-tajmer=setTimeout(()=>kartice.forEach(k=>k.classList.remove("ulazi")),400)},R?0:200)}));
-// Lightbox
-const lb=document.getElementById("lb"),slike=document.getElementById("lbSlike"),naslov=document.getElementById("lbNaslov"),
-opis=document.getElementById("lbOpis"),alat=document.getElementById("lbAlat"),broj=document.getElementById("lbBroj");
-let tren=0,pre=null;
-const vidljivi=()=>kartice.map((k,i)=>k.hidden?-1:i).filter(i=>i>=0);
-function prikazi(i){tren=i;const r=G[i],v=vidljivi(),poz=v.indexOf(i)+1;
-slike.innerHTML="";r.slike.forEach(([src,w,h],n)=>{const im=new Image();im.src=src;im.width=w;im.height=h;im.decoding="async";
-im.alt=r.alt+(r.slike.length>1?" ("+(n+1)+"/"+r.slike.length+")":"");slike.appendChild(im)});
-slike.scrollTop=0;naslov.textContent=r.naslov;opis.textContent=r.opis;alat.textContent=r.alat;broj.textContent=poz+" / "+v.length;
-const sled=G[v[(v.indexOf(i)+1)%v.length]];if(sled){const p=new Image();p.src=sled.slike[0][0]}}
-function otvori(i,izvor){pre=izvor||document.activeElement;prikazi(i);lb.hidden=false;lb.classList.add("otvoren");document.body.classList.add("zakljucan");
-lb.querySelector(".lb-x").focus();window.mgEvent&&mgEvent("portfolio_open",{project:G[i].naslov})}
-function zatvori(){lb.hidden=true;lb.classList.remove("otvoren");document.body.classList.remove("zakljucan");slike.innerHTML="";if(pre&&pre.focus)pre.focus({preventScroll:true})}
-function korak(d){const v=vidljivi(),p=v.indexOf(tren);prikazi(v[(p+d+v.length)%v.length])}
-document.querySelectorAll(".work [data-lb]").forEach(b=>b.addEventListener("click",()=>otvori(+b.dataset.lb,b)));
+// Portfolio "folderi": jedan otvoren u isto vreme; lightbox za Web dizajn (strelice, Esc, klik van slike, swipe).
+(()=>{const folderi=[...document.querySelectorAll(".folders .f")];if(!folderi.length)return;
+function postavi(f,otvoren){f.classList.toggle("open",otvoren);f.querySelector(".head").setAttribute("aria-expanded",otvoren);
+const telo=f.querySelector(".body");otvoren?telo.removeAttribute("inert"):telo.setAttribute("inert","")}
+folderi.forEach(f=>f.querySelector(".head").addEventListener("click",()=>{
+const otvori=!f.classList.contains("open");folderi.forEach(o=>postavi(o,false));
+if(otvori){postavi(f,true);window.mgEvent&&mgEvent("portfolio_folder_open",{folder_name:f.querySelector(".t b").textContent})}}));
+
+// Lightbox: prozor se pravi tek pri prvom otvaranju (nema skrivenog teksta u stranici)
+const podaci=document.getElementById("galerija");if(!podaci)return;
+const G=JSON.parse(podaci.textContent),T=G.tekst;let lb,slike,naslov,opis,meta,broj,tren=0,pre=null;
+function napravi(){lb=document.createElement("div");lb.className="lb";lb.id="lb";lb.hidden=true;
+lb.setAttribute("role","dialog");lb.setAttribute("aria-modal","true");lb.setAttribute("aria-labelledby","lbNaslov");
+lb.innerHTML=`<button type="button" class="lb-x" aria-label="${T.zatvori}">&times;</button>`+
+`<button type="button" class="lb-nav lb-pre" aria-label="${T.pre}">&#8249;</button>`+
+`<button type="button" class="lb-nav lb-sled" aria-label="${T.sled}">&#8250;</button>`+
+`<div class="lb-okvir"><div class="lb-slike"></div><div class="lb-info"><div><h3 id="lbNaslov"></h3><p></p></div>`+
+`<div class="lb-meta"><span class="lb-alat"></span><span class="lb-broj"></span></div></div></div>`;
+document.body.appendChild(lb);slike=lb.querySelector(".lb-slike");naslov=lb.querySelector("h3");opis=lb.querySelector(".lb-info p");
+meta=lb.querySelector(".lb-alat");broj=lb.querySelector(".lb-broj");
 lb.querySelector(".lb-x").addEventListener("click",zatvori);
 lb.querySelector(".lb-pre").addEventListener("click",()=>korak(-1));
 lb.querySelector(".lb-sled").addEventListener("click",()=>korak(1));
 lb.addEventListener("click",e=>{if(e.target===lb)zatvori()});
-document.addEventListener("keydown",e=>{if(lb.hidden)return;
-if(e.key==="Escape")zatvori();else if(e.key==="ArrowRight")korak(1);else if(e.key==="ArrowLeft")korak(-1);
-else if(e.key==="Tab"){const f=[...lb.querySelectorAll("button")],a=f.indexOf(document.activeElement);
-if(e.shiftKey&&a<=0){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&a===f.length-1){e.preventDefault();f[0].focus()}}});
-// swipe levo/desno na telefonu (vertikalno pomeranje ostaje za dugačke stranice)
 let x0=null,y0=0;lb.addEventListener("touchstart",e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
 lb.addEventListener("touchend",e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;
-if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)korak(dx<0?1:-1)},{passive:true})})();
+if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)korak(dx<0?1:-1)},{passive:true})}
+function prikazi(i){tren=i;const r=G.radovi[G.red[i]];slike.innerHTML="";
+r.slike.forEach(([src,w,h],n)=>{const im=new Image();im.src=src;im.width=w;im.height=h;im.decoding="async";
+im.alt=r.alt+(r.slike.length>1?" ("+(n+1)+"/"+r.slike.length+")":"");slike.appendChild(im)});
+slike.scrollTop=0;naslov.textContent=r.naslov;opis.textContent=r.opis;meta.textContent=r.tool+" · "+r.oznaka;
+broj.textContent=(i+1)+" / "+G.red.length;const sled=G.radovi[G.red[(i+1)%G.red.length]];new Image().src=sled.slike[0][0]}
+function otvori(slug,izvor){if(!lb)napravi();pre=izvor;prikazi(G.red.indexOf(slug));lb.hidden=false;lb.classList.add("otvoren");
+document.body.classList.add("zakljucan");lb.querySelector(".lb-x").focus()}
+function zatvori(){lb.hidden=true;lb.classList.remove("otvoren");document.body.classList.remove("zakljucan");slike.innerHTML="";
+if(pre)pre.focus({preventScroll:true})}
+function korak(d){prikazi((tren+d+G.red.length)%G.red.length)}
+document.querySelectorAll(".folders [data-lb]").forEach(b=>b.addEventListener("click",()=>otvori(b.dataset.lb,b)));
+document.addEventListener("keydown",e=>{if(!lb||lb.hidden)return;
+if(e.key==="Escape")zatvori();else if(e.key==="ArrowRight")korak(1);else if(e.key==="ArrowLeft")korak(-1);
+else if(e.key==="Tab"){const f=[...lb.querySelectorAll("button")],a=f.indexOf(document.activeElement);
+if(e.shiftKey&&a<=0){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&a===f.length-1){e.preventDefault();f[0].focus()}}})})();
 </script><script>
 const C={copy:"Kopiraj",ok:"Kopirano"};
 document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{

@@ -11,12 +11,11 @@ GA_ID = "G-STL2YKYT85"
 PRIVATNOST = {"sr": "/privatnost/", "en": "/en/privacy/"}
 LINKOVI = {
     "Eskay Products": "https://eskayproducts.com/",
-    "Tan Ti Studio": "https://tantistudio.netlify.app/",
     "Majstori Pazova": "https://majstoripazova.rs/",
     "GitHub": "https://github.com/MilosG997",
     "QA": "https://github.com/MilosG997/qa-automation",
 }
-from portfolio import KATEGORIJE, RADOVI, jezik, velicine
+from portfolio import FOLDERI, jezik, velicine
 VELICINE = velicine()  # dimenzije slika iz sajt/img/portfolio (pravi ih portfolio.py)
 
 TU = os.path.dirname(os.path.abspath(__file__))
@@ -64,10 +63,9 @@ def stranica(jez):
                f'<a href="/" hreflang="sr" lang="sr"{sr_akt}>SR</a>'
                f'<a href="/en/" hreflang="en" lang="en"{en_akt}>EN</a></div>', b, count=1, flags=re.S)
 
-    # Portfolio: filteri + kartice iz portfolio.py (stare 4 kartice iz dizajna se menjaju)
-    b, n = re.subn(r'<div class="work">.*?</article></div>(?=</div></section>\s*<section id="pitanja")',
-                   lambda mm: portfolio_html(jez), b, count=1, flags=re.S)
-    assert n == 1
+    # Portfolio: folderi iz portfolio.py
+    assert "<!--PORTFOLIO-->" in b
+    b = b.replace("<!--PORTFOLIO-->", portfolio_html(jez), 1)
 
     # Podnožje: email, GitHub, drugi jezik
     drugi = ('<a href="/en/" hreflang="en" lang="en">English</a>' if jez == "sr"
@@ -96,73 +94,66 @@ def stranica(jez):
     assert "apps" in b and "LinkedIn" not in b
     if jez == "en":  # ova oznaka nije bila u rečniku
         b = b.replace("<small>Telefon · Viber · WhatsApp</small>", "<small>Phone · Viber · WhatsApp</small>")
-    b = b.replace("</main>", "</main>\n" + lightbox_html(jez), 1)
+    b = b.replace("</main>", "</main>\n" + galerija_json(jez), 1)
     return b
 
 
+REC = {"sr": {"pogledaj": "Pogledaj", "dizajn": "Pogledaj dizajn"},
+       "en": {"pogledaj": "View", "dizajn": "View design"}}
+# Ikonica foldera iz odobrenog demo dizajna (prednja strana se otvara, papir izlazi)
+IKONA = ('<span class="ico" aria-hidden="true"><svg viewBox="0 0 52 42"><path class="back" d="M2 6a4 4 0 0 1 4-4h13l5 5h22'
+         'a4 4 0 0 1 4 4v27a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/><rect class="paper" x="8" y="10" width="36" height="22" rx="2"/>'
+         '<path class="front" d="M2 15a4 4 0 0 1 4-4h40a4 4 0 0 1 4 4v23a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/></svg></span>')
+STRELICA = ('<svg class="chev" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+            'stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>')
+
+
 def portfolio_html(jez):
-    """Filteri, kartice i prazan lightbox; podaci za galeriju idu u JSON na dnu."""
-    t = T[jez]
-    rec = {"sr": {"pogledaj": "Pogledaj", "dizajn": "Pogledaj dizajn", "filteri": "Filtriraj radove",
-                  "otvori": "Otvori galeriju"},
-           "en": {"pogledaj": "View", "dizajn": "View design", "filteri": "Filter projects",
-                  "otvori": "Open gallery"}}[jez]
+    """Četiri foldera (zatvoreni na početku); stavke su u HTML-u radi Google-a, a inert dok je folder zatvoren."""
     e = lambda x: html.escape(x, quote=True)
-    ima = {r["kat"] for r in RADOVI}  # dugme samo za kategorije koje imaju bar jedan rad
-    filteri = "".join(
-        f'<button type="button" data-filter="{k}" aria-pressed="{"true" if k == "sve" else "false"}">'
-        f'{sr if jez == "sr" else en}</button>' for k, sr, en in KATEGORIJE if k == "sve" or k in ima)
-    kartice = []
-    for i, r in enumerate(RADOVI):
-        naslov = jezik(r["naslov"], jez)
-        opis = t[r["opis_kljuc"]] if "opis_kljuc" in r else r["opis"][jez]
-        chips = "".join(f'<span class="chip">{e(jezik(c, jez))}</span>' for c in r["chips"])
-        w, h = 800, 450
-        slika = (f'<img src="/img/portfolio/{r["slug"]}-thumb.webp" alt="{e(r["alt"][jez])}" '
-                 f'width="{w}" height="{h}" loading="lazy" decoding="async">')
-        if "link" in r:
-            tekst = jezik(r.get("link_tekst", {"sr": f'{rec["pogledaj"]} {naslov}', "en": f'{rec["pogledaj"]} {naslov}'}), jez)
-            dugme = f'<a href="{r["link"]}" target="_blank" rel="noopener">{e(tekst)}</a>'
-        else:
-            dugme = f'<button type="button" class="vise" data-lb="{i}">{rec["dizajn"]}</button>'
-        klijent = f'<small class="klijent">{e(jezik(r["klijent"], jez))}</small>' if "klijent" in r else ""
-        kartice.append(
-            f'<article class="case" data-cat="{r["kat"]}">'
-            f'<button type="button" class="shot" data-lb="{i}" aria-label="{rec["otvori"]}: {e(naslov)}">'
-            f'{slika}<span>{e(naslov)}</span></button>'
-            f'<div class="bd"><div class="chips">{chips}</div>{klijent}<p>{e(opis)}</p>{dugme}</div></article>')
-    return (f'<div class="filteri" role="group" aria-label="{rec["filteri"]}">{filteri}</div>'
-            f'<div class="work">{"".join(kartice)}</div>')
+    rec = REC[jez]
+    out = ['<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="mgFolder" '
+           'x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f5bff"/><stop offset="1" stop-color="#59c3ff"/>'
+           '</linearGradient></defs></svg><div class="folders">']
+    for f in FOLDERI:
+        k = f["key"]
+        stavke = []
+        for s_ in f["stavke"]:
+            naslov = jezik(s_["naslov"], jez)
+            slika = (f'<img class="thumb" src="/img/portfolio/{s_["slug"]}-thumb.webp" alt="{e(s_["alt"][jez])}" '
+                     f'width="480" height="300" loading="lazy" decoding="async">')
+            if s_.get("lightbox"):
+                akcija = f'<button type="button" class="vise" data-lb="{s_["slug"]}">{rec["dizajn"]}</button>'
+            else:
+                tekst = jezik(s_.get("link_tekst", {"sr": f'{rec["pogledaj"]} {naslov}', "en": f'{rec["pogledaj"]} {naslov}'}), jez)
+                akcija = f'<a href="{s_["link"]}" target="_blank" rel="noopener">{e(tekst)}</a>'
+            oznaka = f'<small class="oznaka">{e(s_["oznaka"][jez])}</small>' if "oznaka" in s_ else ""
+            stavke.append(f'<div class="item">{slika}<div><h3>{e(naslov)}</h3>{oznaka}'
+                          f'<p>{e(s_["opis"][jez])}</p>{akcija}</div></div>')
+        out.append(
+            f'<div class="f" data-folder="{k}"><button type="button" class="head" id="fh-{k}" aria-expanded="false" '
+            f'aria-controls="fb-{k}">{IKONA}<span class="t"><b>{e(f["naziv"][jez])}</b><span>{e(f["opis"][jez])}</span></span>'
+            f'<span class="cnt">{len(f["stavke"])}</span>{STRELICA}</button>'
+            f'<div class="body" id="fb-{k}" role="region" aria-labelledby="fh-{k}" inert><div class="inner">'
+            f'<div class="list">{"".join(stavke)}</div></div></div></div>')
+    out.append("</div>")
+    return "".join(out)
+
+
+LIGHTBOX = {"sr": {"zatvori": "Zatvori", "pre": "Prethodni rad", "sled": "Sledeći rad"},
+            "en": {"zatvori": "Close", "pre": "Previous project", "sled": "Next project"}}
 
 
 def galerija_json(jez):
-    """Slajdovi za lightbox: jedna stavka po radu, sa svim slikama tog rada."""
-    t = T[jez]
-    out = []
-    for r in RADOVI:
-        out.append({"naslov": jezik(r["naslov"], jez),
-                    "opis": t[r["opis_kljuc"]] if "opis_kljuc" in r else r["opis"][jez],
-                    "alat": r["alat"], "kat": r["kat"], "alt": r["alt"][jez],
-                    "slike": [[f'/img/portfolio/{r["slug"]}-{n + 1}.webp', w, h]
-                              for n, (w, h) in enumerate(VELICINE[r["slug"]])]})
-    return json.dumps(out, ensure_ascii=False)
-
-
-LIGHTBOX = {"sr": {"zatvori": "Zatvori", "pre": "Prethodni rad", "sled": "Sledeći rad", "alat": "Alat"},
-            "en": {"zatvori": "Close", "pre": "Previous project", "sled": "Next project", "alat": "Tools"}}
-
-
-def lightbox_html(jez):
-    L = LIGHTBOX[jez]
-    return (f'<div class="lb" id="lb" role="dialog" aria-modal="true" aria-labelledby="lbNaslov" hidden>'
-            f'<button type="button" class="lb-x" aria-label="{L["zatvori"]}">&times;</button>'
-            f'<button type="button" class="lb-nav lb-pre" aria-label="{L["pre"]}">&#8249;</button>'
-            f'<button type="button" class="lb-nav lb-sled" aria-label="{L["sled"]}">&#8250;</button>'
-            f'<div class="lb-okvir"><div class="lb-slike" id="lbSlike"></div>'
-            f'<div class="lb-info"><div><h3 id="lbNaslov"></h3><p id="lbOpis"></p></div>'
-            f'<div class="lb-meta"><small>{L["alat"]}</small><span id="lbAlat"></span><span id="lbBroj"></span></div></div>'
-            f'</div></div>'
-            f'<script type="application/json" id="galerija">{galerija_json(jez)}</script>')
+    """Podaci za lightbox (samo Web dizajn). Sam prozor pravi JS tek pri prvom otvaranju."""
+    dizajn = next(f for f in FOLDERI if f["key"] == "dizajn")
+    radovi = {s_["slug"]: {"naslov": jezik(s_["naslov"], jez), "opis": s_["opis"][jez], "oznaka": s_["oznaka"][jez],
+                           "alt": s_["alt"][jez], "tool": "Figma",
+                           "slike": [[f'/img/portfolio/{s_["slug"]}-{n + 1}.webp', w, h]
+                                     for n, (w, h) in enumerate(VELICINE[s_["slug"]])]}
+              for s_ in dizajn["stavke"]}
+    data = {"radovi": radovi, "red": [s_["slug"] for s_ in dizajn["stavke"]], "tekst": LIGHTBOX[jez]}
+    return f'<script type="application/json" id="galerija">{json.dumps(data, ensure_ascii=False)}</script>'
 
 
 def faq(jez):
@@ -254,16 +245,15 @@ const ucitaj=()=>{const s=document.createElement("script");s.async=true;s.src="h
 document.readyState==="complete"?ucitaj():addEventListener("load",ucitaj,{once:true})})();
 function mgEvent(ime,param){try{window.gtag&&gtag("event",ime,Object.assign({page_language:document.documentElement.lang},param||{}))}catch(e){}}
 document.addEventListener("click",e=>{const el=e.target.closest("a,button");if(!el)return;
-const h=el.getAttribute("href")||"",kart=el.closest(".case"),proj=kart&&kart.querySelector(".shot span");
+const h=el.getAttribute("href")||"",stavka=el.closest(".folders .item");
 if(h.startsWith("mailto:"))mgEvent("contact_email_click",{link_location:el.closest("footer")?"footer":"contact"});
 else if(h.startsWith("tel:"))mgEvent("contact_phone_click");
 else if(h.startsWith("viber:"))mgEvent("contact_viber_click");
 else if(h.includes("wa.me/"))mgEvent("contact_whatsapp_click");
 else if(el.dataset.copy)mgEvent("contact_copy_click",{field:el.dataset.copy==="v0"?"email":"phone"});
 else if(el.matches(".ctas .btn-g")&&h.endsWith("#kontakt"))mgEvent("cta_free_quote_click");
-else if(kart&&el.tagName==="A")mgEvent("portfolio_click",{project:proj?proj.textContent:"",link_url:el.href});
-else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")});
-else if(el.dataset.filter)mgEvent("portfolio_filter",{filter:el.dataset.filter,filter_name:el.textContent.trim()})});
+else if(stavka)mgEvent("portfolio_item_click",{item_name:stavka.querySelector("h3").textContent,link_url:el.href||""});
+else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")})});
 </script>
 """ % {"id": GA_ID}
 

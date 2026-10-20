@@ -99,23 +99,41 @@ section + section{border-top:1px solid var(--line)}
 .step h3{font-size:19px;font-weight:600;margin-top:10px}
 .step p{color:var(--muted);font-size:15.5px}
 
-/* Radovi */
-.work{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-@media (max-width:760px){.work{grid-template-columns:1fr}}
-.case{border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--bg2);display:grid;grid-template-rows:auto 1fr;transition:transform .3s var(--ease),border-color .3s,box-shadow .3s;position:relative}
-.case:hover{transform:translateY(-4px);border-color:rgba(89,195,255,.45);box-shadow:0 24px 60px -30px rgba(47,91,255,.6)}
-.shot{all:unset;box-sizing:border-box;cursor:zoom-in;width:100%;position:relative;aspect-ratio:16/9;overflow:hidden;background:linear-gradient(135deg,rgba(47,91,255,.55),rgba(89,195,255,.25));border-bottom:1px solid var(--line);display:flex;align-items:flex-end;padding:18px 22px;font-family:var(--display);font-weight:650;font-size:26px;letter-spacing:-.03em;color:#fff}
-.shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;transition:transform .6s var(--ease)}
-.case:hover .shot img{transform:scale(1.03)}
-.shot::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,10,26,.1) 15%,rgba(5,10,26,.93) 92%)}
-.shot span{position:relative;z-index:1;text-shadow:0 2px 12px rgba(0,0,0,.5)}
-.case .bd{padding:22px 24px 24px;display:grid;gap:12px;align-content:start}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{font-family:var(--mono);font-size:11px;font-weight:500;padding:4px 10px;border-radius:999px;background:rgba(89,195,255,.08);border:1px solid rgba(89,195,255,.18);color:var(--sky)}
-.case p{color:var(--muted);font-size:15.5px}
-.case a,.case .vise{all:unset;cursor:pointer;color:var(--sky);font-weight:600;font-size:14.5px;text-decoration:none;justify-self:start;margin-top:2px}
-.case a::after,.case .vise::after{content:"→";display:inline-block;margin-left:6px;transition:transform .2s var(--ease)}
-.case a:hover::after,.case .vise:hover::after{transform:translateX(3px)}
+/* Radovi: četiri foldera (odobren demo "portfolio-folderi"); otvaranje jednog spušta njegove stavke kao listu */
+.folders{display:grid;gap:14px;max-width:960px}
+.f{border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));overflow:hidden;transition:border-color .3s}
+.f.open{border-color:rgba(89,195,255,.45)}
+.f .head{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:flex;align-items:center;gap:16px;padding:18px 20px}
+.f .head:focus-visible{outline:2px solid var(--sky);outline-offset:-2px;border-radius:18px}
+.f .ico{flex:none;width:52px;height:42px;position:relative;margin:0;background:none;box-shadow:none;border-radius:0;display:block}
+.f .ico svg{width:100%;height:100%;overflow:visible}
+.f .ico .back{fill:#1d3cc9}
+.f .ico .front{fill:url(#mgFolder);transform-origin:50% 100%;transition:transform .45s cubic-bezier(.3,1.4,.5,1)}
+.f.open .ico .front{transform:perspective(200px) rotateX(-38deg)}
+.f .ico .paper{fill:#dfe9ff;transition:transform .45s .05s}
+.f.open .ico .paper{transform:translateY(-7px)}
+.f .t{flex:1;min-width:0;display:grid}
+.f .t b{font-family:var(--display);font-weight:600;font-size:20px;line-height:1.2;letter-spacing:-.02em}
+.f .t span{color:var(--muted);font-size:14px}
+.f .cnt{font-family:var(--mono);font-size:12px;padding:5px 10px;border-radius:999px;background:rgba(89,195,255,.1);color:var(--sky);flex:none}
+.f .chev{flex:none;width:22px;height:22px;transition:transform .35s;color:var(--muted)}
+.f.open .chev{transform:rotate(180deg);color:var(--sky)}
+.f .body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s ease}
+.f.open .body{grid-template-rows:1fr}
+.f .inner{overflow:hidden;min-height:0}
+.f .list{display:grid;gap:10px;padding:0 20px 20px}
+.f .item{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center;padding:12px;border-radius:14px;background:rgba(5,10,26,.6);border:1px solid var(--line);opacity:0;transform:translateY(-12px);transition:opacity .35s,transform .35s}
+.f.open .item{opacity:1;transform:none}
+.f.open .item:nth-child(2){transition-delay:.06s}.f.open .item:nth-child(3){transition-delay:.12s}.f.open .item:nth-child(4){transition-delay:.18s}.f.open .item:nth-child(5){transition-delay:.24s}.f.open .item:nth-child(n+6){transition-delay:.3s}
+@media (max-width:540px){.f .item{grid-template-columns:96px minmax(0,1fr)}.f .head{gap:12px;padding:16px}.f .list{padding:0 12px 12px}}
+.f .thumb{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top center;border-radius:10px;background:linear-gradient(135deg,rgba(47,91,255,.6),rgba(89,195,255,.25))}
+.f .item h3{margin:0;font-family:var(--display);font-weight:600;font-size:17px;line-height:1.25;letter-spacing:-.01em}
+.f .item p{margin:2px 0 6px;color:var(--muted);font-size:14.5px}
+.f .oznaka{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--dim);margin-top:2px}
+.f .item a,.f .item .vise{all:unset;cursor:pointer;color:var(--sky);font-size:13.5px;font-weight:600;text-decoration:none}
+.f .item a::after,.f .item .vise::after{content:" →"}
+.f .item a:focus-visible,.f .item .vise:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:4px}
+@media (prefers-reduced-motion:reduce){.f *,.f{transition:none!important}.f .item{opacity:1;transform:none}}
 
 /* Pitanja */
 .faq{display:grid;gap:10px;max-width:860px}
@@ -168,21 +186,7 @@ footer a:hover{color:var(--fg)}
 .prose a{color:var(--sky);text-underline-offset:3px}
 .prose .datum{font-family:var(--mono);font-size:12.5px;color:var(--dim)}
 
-/* Portfolio: filteri, kartice, animacija */
-.shot:focus-visible,.case a:focus-visible,.case .vise:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:6px}
-.shot:focus-visible{outline-offset:-3px;border-radius:20px 20px 0 0}
-.filteri{display:flex;flex-wrap:wrap;gap:8px;margin:-16px 0 28px}
-.filteri button{all:unset;cursor:pointer;font-family:var(--mono);font-size:12.5px;font-weight:500;letter-spacing:.02em;padding:9px 16px;border-radius:999px;border:1px solid var(--line2);color:var(--muted);background:var(--glass);transition:color .2s,border-color .2s,background .2s}
-.filteri button:hover{color:var(--fg);border-color:var(--sky)}
-.filteri button[aria-pressed="true"]{color:#fff;border-color:transparent;background:linear-gradient(135deg,var(--royal),var(--sky))}
-.filteri button:focus-visible{outline:2px solid var(--sky);outline-offset:3px}
-@media (max-width:520px){.filteri{flex-wrap:nowrap;overflow-x:auto;margin-inline:-20px;padding:2px 20px 6px;scrollbar-width:none}.filteri::-webkit-scrollbar{display:none}.filteri button{flex:none}}
-.case{transition:transform .3s var(--ease),border-color .3s,box-shadow .3s,opacity .25s var(--ease)}
-.case.skriva{opacity:0;transform:scale(.97)}
-.case.ulazi{animation:ulazi .35s var(--ease) both}
 @keyframes ulazi{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.case.ulazi{animation:none}}
-.klijent{font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.04em;margin-top:-4px}
 
 /* Lightbox galerija */
 .lb{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) 16px max(16px,env(safe-area-inset-bottom,0px));background:rgba(3,7,22,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
@@ -196,7 +200,6 @@ footer a:hover{color:var(--fg)}
 .lb-info h3{font-size:21px;font-weight:600}
 .lb-info p{color:var(--muted);font-size:15px;margin-top:4px;max-width:62ch}
 .lb-meta{display:grid;gap:2px;text-align:right;font-family:var(--mono);font-size:12.5px;color:var(--fg)}
-.lb-meta small{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
 #lbBroj{color:var(--dim);margin-top:6px}
 .lb-x,.lb-nav{all:unset;cursor:pointer;position:fixed;z-index:51;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;background:rgba(8,17,42,.85);border:1px solid var(--line2);color:#fff;font-size:28px;line-height:1;transition:background .2s,border-color .2s}
 .lb-x:hover,.lb-nav:hover{border-color:var(--sky);background:rgba(47,91,255,.35)}

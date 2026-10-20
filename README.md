@@ -21,8 +21,8 @@ Source of [mechanicallygifted.rs](https://mechanicallygifted.rs), the site for m
 | `stil.css` | All styles (Geist + Geist Mono) |
 | `napravi-sajt.py` | Builds `sajt/index.html` and `sajt/en/index.html` from the design: puts the right language text into the HTML, adds SEO tags, JSON-LD, contact and portfolio links |
 | `napravi-slike.py` | Renders the share image, icons and project screenshots with headless Chrome |
-| `portfolio.py` | Portfolio data (SR/EN, categories, alt texts) and WebP thumbnails (800 px) + gallery images (up to 1800 px) |
-| `portfolio.js` | Portfolio filters and the lightbox gallery (arrows, Esc, click outside, swipe) |
+| `portfolio.py` | Portfolio folders (Shopify, Websites & apps, Web design, QA): SR/EN texts, alt texts, 16:10 WebP thumbnails + gallery images (up to 1800 px) |
+| `portfolio.js` | Folders (one open at a time, keyboard, inert when closed) and the Web design lightbox, built on first open |
 | `sajt/` | The finished site, deployed to Netlify |
 | `mechanically-gifted-tech.html` | The original single-file design this started from |
 

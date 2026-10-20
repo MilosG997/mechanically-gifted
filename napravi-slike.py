@@ -37,11 +37,10 @@ zaobljena = velika.convert("RGBA")
 zaobljena.putalpha(maska)
 zaobljena.save(os.path.join(SAJT, "favicon.ico"), sizes=[(16, 16), (32, 32), (48, 48)])
 
-# Isečak (levo, gore, širina) — Tan Ti: bez prazne naslovne slike; Majstori: srednja kolona
-ISECAK = {"tanti": (0, 0, 760), "majstori": (300, 0, 680)}
-PROJEKTI = {
+PROJEKTI = {  # snimci početnih strana (isečke i veličine određuje portfolio.py)
+    "hosiery": "https://hosieryplus.com/",
+    "tiptoe": "https://tiptoeboutique.com/",
     "eskay": "https://eskayproducts.com/",
-    "tanti": "https://tantistudio.netlify.app/",
     "majstori": "https://majstoripazova.rs/",
     "qa": fajl("qa.html"),
 }
