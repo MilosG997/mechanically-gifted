@@ -1,0 +1,5 @@
+# Objava preko Netlify CLI (ZIP ne podržava funkcije):
+#   netlify deploy --prod
+[build]
+  publish = "sajt"
+  functions = "netlify/functions"

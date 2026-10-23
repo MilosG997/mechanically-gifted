@@ -259,6 +259,52 @@ body.zakljucan{overflow:hidden}
 .ft-usl{white-space:nowrap}
 .ft-usl::before{content:" · "}
 @media (max-width:640px){.ft{display:grid;gap:2px}.ft-usl::before{content:none}}
+
+/* Recenzije sa Google-a (odobren demo "google-recenzije"): traka sa ocenom, staklene kartice, strelice i tačkice */
+.rev-sec{--star:#fbbc04}
+.rev-sec h2{font-size:clamp(28px,4vw,42px);font-weight:650;margin:10px 0 24px}
+.rev-sum{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03);margin-bottom:22px}
+.rev-score{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.rev-g{width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;flex:none}
+.rev-big{font-family:var(--display);font-weight:700;font-size:36px;line-height:1}
+.rev-stars{color:var(--star);letter-spacing:2px;font-size:18px;line-height:1.2}
+.rev-stars .rev-off{color:rgba(255,255,255,.18)}
+.rev-cnt{font-size:14px;color:var(--muted)}
+.rev-acts{display:flex;gap:10px;flex-wrap:wrap}
+.rev-acts .btn{min-height:0;padding:11px 18px;border-radius:11px;font-size:14px;gap:8px}
+.rev-acts .btn-g::after{content:none}
+.rev-wrap{position:relative}
+.rev-track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding-bottom:14px;scrollbar-width:thin;overscroll-behavior-x:contain}
+.rev-track:focus-visible{outline:2px solid var(--sky);outline-offset:4px;border-radius:12px}
+.rev-card{flex:0 0 calc((100% - 32px)/3);scroll-snap-align:start;position:relative;border:1px solid var(--line);border-radius:20px;padding:24px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.015));display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (max-width:900px){.rev-card{flex-basis:calc((100% - 16px)/2)}}
+@media (max-width:600px){.rev-card{flex-basis:86%}}
+.rev-card::before{content:"";position:absolute;inset:-1px;border-radius:20px;padding:1px;background:linear-gradient(135deg,rgba(89,195,255,.5),transparent 45%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.rev-top{display:flex;align-items:center;gap:12px}
+.rev-av{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:15px;color:#fff;background:linear-gradient(135deg,var(--royal),var(--sky));object-fit:cover}
+.rev-who{flex:1;min-width:0}
+.rev-who b{display:block;font-family:var(--display);font-weight:600;font-size:15px;line-height:1.2;overflow-wrap:anywhere}
+.rev-who span{font-size:13px;color:var(--muted)}
+.rev-gm{flex:none;width:22px;height:22px}
+.rev-q{position:absolute;right:20px;top:58px;font-family:var(--display);font-weight:700;font-size:70px;line-height:1;background:linear-gradient(135deg,var(--royal),var(--sky));-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.25;pointer-events:none}
+.rev-txt{color:#c9d2ef;flex:1;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;white-space:pre-line}
+.rev-txt.open{display:block;-webkit-line-clamp:unset}
+.rev-vise{all:unset;cursor:pointer;align-self:flex-start;font-size:13.5px;color:var(--fg);font-weight:600;border-bottom:1px solid var(--line2)}
+.rev-vise:focus-visible,.rev-more:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:4px}
+.rev-more{font-size:13.5px;color:var(--sky);font-weight:600;text-decoration:none}
+.rev-nav{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.rev-dots{display:flex;gap:7px}
+.rev-dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .3s}
+.rev-dots i.on{width:22px;border-radius:5px;background:var(--sky)}
+.rev-arrows{display:flex;gap:8px}
+.rev-arrows button{all:unset;cursor:pointer;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--fg);background:rgba(255,255,255,.03);font-size:20px}
+.rev-arrows button:hover{border-color:var(--sky)}
+.rev-arrows button:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+.rev-src{font-size:12.5px;color:var(--muted);margin-top:16px;display:flex;align-items:center;gap:8px}
+/* Mala traka dok nema recenzija */
+.rev-sec.rev-mala{padding-block:56px}
+.rev-poziv{display:flex;align-items:center;gap:14px;font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.01em}
+@media (prefers-reduced-motion:reduce){.rev-track{scroll-behavior:auto}.rev-dots i{transition:none}}
 </style>
 </head>
 <body>
@@ -282,6 +328,8 @@ else if(h.startsWith("viber:"))mgEvent("contact_viber_click");
 else if(h.includes("wa.me/"))mgEvent("contact_whatsapp_click");
 else if(el.dataset.copy)mgEvent("contact_copy_click",{field:el.dataset.copy==="v0"?"email":"phone"});
 else if(el.matches(".ctas .btn-g")&&h.endsWith("#kontakt"))mgEvent("cta_free_quote_click");
+else if(el.matches(".rev-ostavi"))mgEvent("review_leave_click",{link_location:el.closest(".rev-mala")?"strip":"reviews"});
+else if(el.matches(".rev-svi"))mgEvent("review_see_all_click");
 else if(stavka)mgEvent("portfolio_item_click",{item_name:stavka.querySelector("h3").textContent,link_url:el.href||""});
 else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")})});
 </script>
@@ -328,6 +376,50 @@ document.addEventListener("keydown",e=>{if(!lb||lb.hidden)return;
 if(e.key==="Escape")zatvori();else if(e.key==="ArrowRight")korak(1);else if(e.key==="ArrowLeft")korak(-1);
 else if(e.key==="Tab"){const f=[...lb.querySelectorAll("button")],a=f.indexOf(document.activeElement);
 if(e.shiftKey&&a<=0){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&a===f.length-1){e.preventDefault();f[0].focus()}}})})();
+</script><script>
+// "Šta kažu klijenti": recenzije sa Google-a preko /.netlify/functions/reviews (učitava se tek kad se priđe sekciji).
+// Dok nema recenzija (ili API ne odgovori) ostaje mala traka "Ostavite recenziju"; čim ih ima, crta se cela sekcija.
+(()=>{const sec=document.getElementById("recenzije");if(!sec)return;
+const L=JSON.parse(sec.dataset.tekst);let uradjeno=false;
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function zvezde(n){const s=el("div","rev-stars");s.setAttribute("aria-label",L.ocena.replace("{n}",n));
+for(let i=1;i<=5;i++){const z=el("span",i<=Math.round(n)?"":"rev-off","★");z.setAttribute("aria-hidden","true");s.appendChild(z)}return s}
+function gLogo(w){const s=document.createElementNS("http://www.w3.org/2000/svg","svg");s.setAttribute("width",w);s.setAttribute("height",w);
+s.setAttribute("aria-hidden","true");const u=document.createElementNS("http://www.w3.org/2000/svg","use");u.setAttribute("href","#revG");s.appendChild(u);return s}
+function inicijali(ime){return ime.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join("").toUpperCase()||"?"}
+function broj(n){return L.lang==="sr"?(n%10>=1&&n%10<=4&&!(n%100>=11&&n%100<=14)?L.cnt1:L.cnt5):(n===1?L.cnt1:L.cnt5)}
+function kartica(r){const a=el("article","rev-card");const q=el("div","rev-q","“");q.setAttribute("aria-hidden","true");a.appendChild(q);
+const top=el("div","rev-top");let av;
+if(r.photo){av=el("img","rev-av");av.src=r.photo;av.alt="";av.width=42;av.height=42;av.referrerPolicy="no-referrer";
+av.onerror=()=>{const z=el("div","rev-av",inicijali(r.author));av.replaceWith(z)}}else av=el("div","rev-av",inicijali(r.author));
+const who=el("div","rev-who");who.appendChild(el("b",null,r.author));who.appendChild(el("span",null,r.time));
+const gm=gLogo(22);gm.setAttribute("class","rev-gm");top.append(av,who,gm);a.append(top,zvezde(r.rating));
+const t=el("p","rev-txt",r.text);if(r.lang)t.lang=r.lang;a.appendChild(t);
+const vise=el("button","rev-vise",L.vise);vise.type="button";vise.hidden=true;
+vise.onclick=()=>{const otv=t.classList.toggle("open");vise.textContent=otv?L.manje:L.vise};a.appendChild(vise);
+if(r.link){const l=el("a","rev-more",L.link);l.href=r.link;l.target="_blank";l.rel="noopener";a.appendChild(l)}
+requestAnimationFrame(()=>{vise.hidden=t.scrollHeight<=t.clientHeight+2});return a}
+function nacrtaj(d){const w=el("div","w");
+const eye=el("div","eye",L.eye),h=el("h2",null,L.naslov);
+const sum=el("div","rev-sum"),score=el("div","rev-score"),g=el("div","rev-g");g.appendChild(gLogo(24));
+const info=el("div");info.append(zvezde(d.rating||0),el("div","rev-cnt",broj(d.userRatingCount).replace("{n}",d.userRatingCount)));
+score.append(g,el("div","rev-big",(d.rating||0).toFixed(1).replace(".",L.lang==="sr"?",":".")),info);
+const acts=sec.querySelector(".rev-acts").cloneNode(true);acts.querySelector(".rev-svi").hidden=false;sum.append(score,acts);
+const wrap=el("div","rev-wrap"),track=el("div","rev-track"),nav=el("div","rev-nav"),dots=el("div","rev-dots"),arr=el("div","rev-arrows");
+track.tabIndex=0;track.setAttribute("aria-label",L.naslov);d.reviews.forEach(r=>{track.appendChild(kartica(r));dots.appendChild(el("i"))});
+const pre=el("button",null,"‹"),sled=el("button",null,"›");pre.type=sled.type="button";pre.setAttribute("aria-label",L.pre);sled.setAttribute("aria-label",L.sled);
+arr.append(pre,sled);nav.append(dots,arr);wrap.append(track,nav);
+const src=el("div","rev-src");src.append(gLogo(16),document.createTextNode(L.izvor));
+w.append(eye,h,sum,wrap,src);sec.classList.remove("rev-mala");sec.replaceChildren(w);
+const kar=[...track.children],tacke=[...dots.children],korak=()=>kar[0].offsetWidth+16;
+function upd(){const i=Math.round(track.scrollLeft/korak());tacke.forEach((t,k)=>t.classList.toggle("on",k===Math.min(i,tacke.length-1)));
+const ima=track.scrollWidth>track.clientWidth+2;nav.hidden=!ima}
+track.addEventListener("scroll",upd,{passive:true});addEventListener("resize",upd);upd();
+sled.onclick=()=>track.scrollBy({left:korak()});pre.onclick=()=>track.scrollBy({left:-korak()})}
+function ucitaj(){if(uradjeno)return;uradjeno=true;
+fetch("/.netlify/functions/reviews?lang="+L.lang).then(r=>r.ok?r.json():null).then(d=>{if(d&&d.reviews&&d.reviews.length)nacrtaj(d)}).catch(()=>{})}
+if("IntersectionObserver"in window){const io=new IntersectionObserver(e=>{if(e.some(x=>x.isIntersecting)){io.disconnect();ucitaj()}},{rootMargin:"800px"});io.observe(sec)}
+else addEventListener("load",ucitaj)})();
 </script><script>
 const C={copy:"Kopiraj",ok:"Kopirano"};
 document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{

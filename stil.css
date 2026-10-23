@@ -226,3 +226,49 @@ body.zakljucan{overflow:hidden}
 .ft-usl{white-space:nowrap}
 .ft-usl::before{content:" · "}
 @media (max-width:640px){.ft{display:grid;gap:2px}.ft-usl::before{content:none}}
+
+/* Recenzije sa Google-a (odobren demo "google-recenzije"): traka sa ocenom, staklene kartice, strelice i tačkice */
+.rev-sec{--star:#fbbc04}
+.rev-sec h2{font-size:clamp(28px,4vw,42px);font-weight:650;margin:10px 0 24px}
+.rev-sum{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.03);margin-bottom:22px}
+.rev-score{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.rev-g{width:40px;height:40px;border-radius:50%;background:#fff;display:grid;place-items:center;flex:none}
+.rev-big{font-family:var(--display);font-weight:700;font-size:36px;line-height:1}
+.rev-stars{color:var(--star);letter-spacing:2px;font-size:18px;line-height:1.2}
+.rev-stars .rev-off{color:rgba(255,255,255,.18)}
+.rev-cnt{font-size:14px;color:var(--muted)}
+.rev-acts{display:flex;gap:10px;flex-wrap:wrap}
+.rev-acts .btn{min-height:0;padding:11px 18px;border-radius:11px;font-size:14px;gap:8px}
+.rev-acts .btn-g::after{content:none}
+.rev-wrap{position:relative}
+.rev-track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding-bottom:14px;scrollbar-width:thin;overscroll-behavior-x:contain}
+.rev-track:focus-visible{outline:2px solid var(--sky);outline-offset:4px;border-radius:12px}
+.rev-card{flex:0 0 calc((100% - 32px)/3);scroll-snap-align:start;position:relative;border:1px solid var(--line);border-radius:20px;padding:24px;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.015));display:flex;flex-direction:column;gap:14px;min-width:0}
+@media (max-width:900px){.rev-card{flex-basis:calc((100% - 16px)/2)}}
+@media (max-width:600px){.rev-card{flex-basis:86%}}
+.rev-card::before{content:"";position:absolute;inset:-1px;border-radius:20px;padding:1px;background:linear-gradient(135deg,rgba(89,195,255,.5),transparent 45%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.rev-top{display:flex;align-items:center;gap:12px}
+.rev-av{flex:none;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:15px;color:#fff;background:linear-gradient(135deg,var(--royal),var(--sky));object-fit:cover}
+.rev-who{flex:1;min-width:0}
+.rev-who b{display:block;font-family:var(--display);font-weight:600;font-size:15px;line-height:1.2;overflow-wrap:anywhere}
+.rev-who span{font-size:13px;color:var(--muted)}
+.rev-gm{flex:none;width:22px;height:22px}
+.rev-q{position:absolute;right:20px;top:58px;font-family:var(--display);font-weight:700;font-size:70px;line-height:1;background:linear-gradient(135deg,var(--royal),var(--sky));-webkit-background-clip:text;background-clip:text;color:transparent;opacity:.25;pointer-events:none}
+.rev-txt{color:#c9d2ef;flex:1;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;white-space:pre-line}
+.rev-txt.open{display:block;-webkit-line-clamp:unset}
+.rev-vise{all:unset;cursor:pointer;align-self:flex-start;font-size:13.5px;color:var(--fg);font-weight:600;border-bottom:1px solid var(--line2)}
+.rev-vise:focus-visible,.rev-more:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:4px}
+.rev-more{font-size:13.5px;color:var(--sky);font-weight:600;text-decoration:none}
+.rev-nav{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.rev-dots{display:flex;gap:7px}
+.rev-dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .3s}
+.rev-dots i.on{width:22px;border-radius:5px;background:var(--sky)}
+.rev-arrows{display:flex;gap:8px}
+.rev-arrows button{all:unset;cursor:pointer;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;color:var(--fg);background:rgba(255,255,255,.03);font-size:20px}
+.rev-arrows button:hover{border-color:var(--sky)}
+.rev-arrows button:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+.rev-src{font-size:12.5px;color:var(--muted);margin-top:16px;display:flex;align-items:center;gap:8px}
+/* Mala traka dok nema recenzija */
+.rev-sec.rev-mala{padding-block:56px}
+.rev-poziv{display:flex;align-items:center;gap:14px;font-family:var(--display);font-weight:600;font-size:17px;letter-spacing:-.01em}
+@media (prefers-reduced-motion:reduce){.rev-track{scroll-behavior:auto}.rev-dots i{transition:none}}

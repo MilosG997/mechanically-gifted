@@ -7,6 +7,9 @@ EMAIL = "mechanicallygifted@gmail.com"
 TEL_PRIKAZ = "+381 69 3329 029"
 TEL = "+381693329029"
 GA_ID = "G-STL2YKYT85"
+# Google recenzije: link iz "Zatražite recenzije" (Google Business) i profil na Google Mapama
+RECENZIJA_LINK = ""
+MAPE_LINK = ""
 # Politika privatnosti po jeziku
 PRIVATNOST = {"sr": "/privatnost/", "en": "/en/privacy/"}
 LINKOVI = {
@@ -63,6 +66,10 @@ def stranica(jez):
                f'<a href="/" hreflang="sr" lang="sr"{sr_akt}>SR</a>'
                f'<a href="/en/" hreflang="en" lang="en"{en_akt}>EN</a></div>', b, count=1, flags=re.S)
 
+    # Recenzije sa Google-a iznad FAQ-a (podrazumevano mala traka; JS je zameni karticama kad ih ima)
+    assert '<section id="pitanja">' in b
+    b = b.replace('<section id="pitanja">', recenzije_html(jez) + '<section id="pitanja">', 1)
+
     # Portfolio: folderi iz portfolio.py
     assert "<!--PORTFOLIO-->" in b
     b = b.replace("<!--PORTFOLIO-->", portfolio_html(jez), 1)
@@ -96,6 +103,41 @@ def stranica(jez):
         b = b.replace("<small>Telefon · Viber · WhatsApp</small>", "<small>Phone · Viber · WhatsApp</small>")
     b = b.replace("</main>", "</main>\n" + galerija_json(jez), 1)
     return b
+
+
+RECENZIJE = {
+    "sr": {"lang": "sr", "eye": "Recenzije", "naslov": "Šta kažu klijenti", "svi": "Pogledaj sve na Google-u",
+           "ostavi": "★ Ostavi recenziju", "cnt1": "na osnovu {n} recenzije na Google-u",
+           "cnt5": "na osnovu {n} recenzija na Google-u", "vise": "Prikaži još", "manje": "Prikaži manje",
+           "link": "Pogledaj na Google-u →", "izvor": "Recenzije sa Google-a", "pre": "Prethodne", "sled": "Sledeće",
+           "ocena": "Ocena {n} od 5", "poziv": "Radili ste sa mnom? Ostavite recenziju na Google-u"},
+    "en": {"lang": "en", "eye": "Reviews", "naslov": "What clients say", "svi": "See all on Google",
+           "ostavi": "★ Leave a review", "cnt1": "based on {n} review on Google",
+           "cnt5": "based on {n} reviews on Google", "vise": "Show more", "manje": "Show less",
+           "link": "View on Google →", "izvor": "Reviews from Google", "pre": "Previous", "sled": "Next",
+           "ocena": "Rated {n} out of 5", "poziv": "Worked with me? Leave a review on Google"},
+}
+GOOGLE_G = ('<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="revG" viewBox="0 0 48 48">'
+            '<path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/>'
+            '<path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.8c4.3-4 6.9-9.9 6.9-17.2z"/>'
+            '<path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/>'
+            '<path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.8c-2.1 1.4-4.8 2.3-8.5 2.3-6.2 0-11.5-4.1-13.4-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/>'
+            '</symbol></svg>')
+
+
+def recenzije_html(jez):
+    """Mala traka "Ostavite recenziju" u HTML-u; recenzije.js je zameni celom sekcijom kad API vrati recenzije."""
+    L = RECENZIJE[jez]
+    e = lambda x: html.escape(x, quote=True)
+    ostavi = RECENZIJA_LINK or "#"
+    mape = MAPE_LINK or "#"
+    return (f'{GOOGLE_G}<section id="recenzije" class="rev-sec rev-mala" data-tekst="{e(json.dumps(L, ensure_ascii=False))}">'
+            f'<div class="w"><div class="rev-sum">'
+            f'<div class="rev-poziv"><div class="rev-g"><svg width="24" height="24" aria-hidden="true"><use href="#revG"/></svg></div>'
+            f'<span>{e(L["poziv"])}</span></div><div class="rev-acts">'
+            f'<a class="btn btn-l rev-svi" href="{e(mape)}" target="_blank" rel="noopener" hidden>{e(L["svi"])}</a>'
+            f'<a class="btn btn-g rev-ostavi" href="{e(ostavi)}" target="_blank" rel="noopener">{e(L["ostavi"])}</a>'
+            f'</div></div></div></section>\n')
 
 
 REC = {"sr": {"pogledaj": "Pogledaj", "dizajn": "Pogledaj dizajn"},
@@ -252,6 +294,8 @@ else if(h.startsWith("viber:"))mgEvent("contact_viber_click");
 else if(h.includes("wa.me/"))mgEvent("contact_whatsapp_click");
 else if(el.dataset.copy)mgEvent("contact_copy_click",{field:el.dataset.copy==="v0"?"email":"phone"});
 else if(el.matches(".ctas .btn-g")&&h.endsWith("#kontakt"))mgEvent("cta_free_quote_click");
+else if(el.matches(".rev-ostavi"))mgEvent("review_leave_click",{link_location:el.closest(".rev-mala")?"strip":"reviews"});
+else if(el.matches(".rev-svi"))mgEvent("review_see_all_click");
 else if(stavka)mgEvent("portfolio_item_click",{item_name:stavka.querySelector("h3").textContent,link_url:el.href||""});
 else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")})});
 </script>
@@ -259,11 +303,12 @@ else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.ge
 
 
 PORTFOLIO_JS = open(os.path.join(TU, "portfolio.js"), encoding="utf-8").read()
+RECENZIJE_JS = open(os.path.join(TU, "recenzije.js"), encoding="utf-8").read()
 
 
 def skripte(jez):
     t = T[jez]
-    return GA + "<script>\n" + PORTFOLIO_JS + "</script>" + """<script>
+    return GA + "<script>\n" + PORTFOLIO_JS + "</script><script>\n" + RECENZIJE_JS + "</script>" + """<script>
 const C={copy:%s,ok:%s};
 document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{
 const el=document.getElementById(b.dataset.copy);

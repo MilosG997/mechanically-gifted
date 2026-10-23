@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
 izvor-slika/snimci/
+sajt/.netlify/
+.netlify/
