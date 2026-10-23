@@ -429,17 +429,20 @@ const sel=()=>{const r=document.createRange();r.selectNodeContents(el);const s=g
 try{navigator.clipboard.writeText(el.textContent).then(ok,sel)}catch(e){sel()}}));
 </script><script>
 // Animirana mreža: u hederu (#net) i iza kontakt bloka (.mreza); svaka radi samo dok je na ekranu
-document.querySelectorAll("#net, canvas.mreza").forEach(c=>{const x=c.getContext("2d");let W=0,H,P=[],vid=true,radi=false;const R=matchMedia("(prefers-reduced-motion: reduce)").matches;
+document.querySelectorAll("#net, canvas.mreza").forEach(c=>{const x=c.getContext("2d");let W=0,H,P=[],vid=true,radi=false,spremno=false;const R=matchMedia("(prefers-reduced-motion: reduce)").matches;
 function size(){const r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);if(r.width===W&&P.length)return;W=r.width;H=r.height;c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);
 const mali=W<600,n=Math.round(Math.min(mali?36:90,W*H/(mali?16000:14000)));P=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.4+.8}));draw()}
 function draw(){x.clearRect(0,0,W,H);const D=W<600?120:150;
 for(let i=0;i<P.length;i++){const a=P[i];for(let j=i+1;j<P.length;j++){const b=P[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<D){x.strokeStyle="rgba(120,170,255,"+(1-d/D)*.35+")";x.lineWidth=.8;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}}
 for(const p of P){x.fillStyle="rgba(170,215,255,.9)";x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill()}}
 function step(){if(!vid||document.hidden){radi=false;return}for(const p of P){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1}draw();requestAnimationFrame(step)}
-function kreni(){if(!R&&!radi&&vid&&!document.hidden){radi=true;requestAnimationFrame(step)}}
+function kreni(){if(spremno&&!R&&!radi&&vid&&!document.hidden){radi=true;requestAnimationFrame(step)}}
 addEventListener("resize",size);size();
 if("IntersectionObserver"in window)new IntersectionObserver(e=>{vid=e[0].isIntersecting;kreni()}).observe(c);
-document.addEventListener("visibilitychange",kreni);kreni()});
+document.addEventListener("visibilitychange",kreni);
+// prvi kadar odmah (mirna mreža), pokret tek kad se stranica učita i procesor odmori — lakše učitavanje na telefonu
+const pokreni=()=>{spremno=true;kreni()};const posle=()=>("requestIdleCallback"in window)?requestIdleCallback(pokreni,{timeout:2500}):setTimeout(pokreni,1200);
+document.readyState==="complete"?posle():addEventListener("load",posle,{once:true})});
 </script>
 </body>
 </html>
