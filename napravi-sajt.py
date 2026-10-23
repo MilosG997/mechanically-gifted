@@ -8,8 +8,8 @@ TEL_PRIKAZ = "+381 69 3329 029"
 TEL = "+381693329029"
 GA_ID = "G-STL2YKYT85"
 # Google recenzije: link iz "Zatražite recenzije" (Google Business) i profil na Google Mapama
-RECENZIJA_LINK = ""
-MAPE_LINK = ""
+RECENZIJA_LINK = "https://g.page/r/CS8wyzo--3KAEBM/review"
+MAPE_LINK = "https://maps.google.com/?cid=9255736428892729391"
 # Politika privatnosti po jeziku
 PRIVATNOST = {"sr": "/privatnost/", "en": "/en/privacy/"}
 LINKOVI = {
