@@ -8,9 +8,9 @@ CLIENT = {"sr": "Freelance klijent", "en": "Freelance client"}
 KONCEPT = {"sr": "Koncept", "en": "Concept"}
 
 
-def figma(slug, naslov, opis, alt, izvori, oznaka=CLIENT):
+def figma(slug, naslov, opis, alt, izvori, oznaka=CLIENT, folder="figma"):
     return {"slug": slug, "naslov": naslov, "opis": opis, "alt": alt, "oznaka": oznaka,
-            "izvor": [("figma", i, None) for i in izvori], "lightbox": True}
+            "izvor": [(folder, i, None) for i in izvori], "lightbox": True}
 
 
 FOLDERI = [
@@ -86,6 +86,24 @@ FOLDERI = [
                {"sr": "Sajt za NFT i digitalnu umetnost, tamna tema sa neon akcentima.",
                 "en": "NFT and digital art website, dark theme with neon accents."},
                {"sr": "Web dizajn Temps za digitalnu umetnost", "en": "Temps digital art web design"}, ["1-40913"]),
+         figma("kruger", "Kruger",
+               {"sr": "Sajt za safari i divlji život, sa akvarel ilustracijama životinja.",
+                "en": "Safari and wildlife website with watercolor animal illustrations."},
+               {"sr": "Web dizajn Kruger sa žirafom, lavom i džipom u akvarel stilu",
+                "en": "Kruger web design with a giraffe, a lion and a jeep in watercolor style"},
+               ["1-42158"], folder="figma-izvoz"),
+         figma("real-estates", "Real Estates",
+               {"sr": "Mobilna aplikacija za prodaju i izdavanje nekretnina, sa pretragom i detaljima stana.",
+                "en": "Mobile app for buying and renting property, with search and listing details."},
+               {"sr": "Dizajn mobilne aplikacije Real Estates, tri ekrana sa kućama i stanovima",
+                "en": "Real Estates mobile app design, three screens with houses and apartments"},
+               ["1-41584"], folder="figma-izvoz"),
+         figma("tasty-burger", "Tasty Burger",
+               {"sr": "Mobilna aplikacija za naručivanje hrane: meni, kategorije i ponuda dana.",
+                "en": "Food ordering mobile app: menu, categories and the offer of the day."},
+               {"sr": "Dizajn mobilne aplikacije Tasty Burger sa ilustracijama burgera",
+                "en": "Tasty Burger mobile app design with burger illustrations"},
+               ["1-42232"], folder="figma-izvoz"),
          figma("infinity-serija", {"sr": "Infinity serija – 4 landing stranice", "en": "Infinity series – 4 landing pages"},
                {"sr": "Četiri SaaS landing stranice: saradnja timova, upravljanje zadacima, kreativna agencija i analiza proizvoda.",
                 "en": "Four SaaS landing pages: team collaboration, task management, a creative agency and product analytics."},
