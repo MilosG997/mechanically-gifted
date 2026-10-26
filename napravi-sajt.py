@@ -134,6 +134,24 @@ RECENZIJE = {
            "link": "View on Google →", "izvor": "Reviews from Google", "pre": "Previous", "sled": "Next",
            "ocena": "Rated {n} out of 5", "poziv": "Worked with me? Leave a review on Google"},
 }
+# Recenzije prepisane sa Google profila (dok Places API ključ nije podešen). Tekst u originalu, kako je napisan.
+# Nova recenzija: dodaj stavku, ažuriraj ocenu/broj sa profila, pa napravi i objavi sajt.
+RUCNE_RECENZIJE = {
+    "rating": 5.0, "userRatingCount": 8,
+    "reviews": [
+        {"author": "Božidar Božović", "rating": 5, "lang": "bs", "text": "Podrška za nove inovacije 💪…",
+         "photo": "https://lh3.googleusercontent.com/a/ACg8ocKrStb9IZz1tF8n9056qfGnoLW_v6Mq58u_J_5kGyQyQD8TAA=w84-h84-p-rp-mo-br100",
+         "time": {"sr": "oktobar 2026.", "en": "October 2026"}},
+    ],
+}
+
+
+def rucne_recenzije(jez):
+    d = dict(RUCNE_RECENZIJE, mapsUri=MAPE_LINK)
+    d["reviews"] = [dict(r, time=r["time"][jez], link=MAPE_LINK) for r in RUCNE_RECENZIJE["reviews"]]
+    return d
+
+
 GOOGLE_G = ('<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="revG" viewBox="0 0 48 48">'
             '<path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/>'
             '<path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.8c4.3-4 6.9-9.9 6.9-17.2z"/>'
@@ -148,7 +166,8 @@ def recenzije_html(jez):
     e = lambda x: html.escape(x, quote=True)
     ostavi = RECENZIJA_LINK or "#"
     mape = MAPE_LINK or "#"
-    return (f'{GOOGLE_G}<section id="recenzije" class="rev-sec rev-mala" data-tekst="{e(json.dumps(L, ensure_ascii=False))}">'
+    return (f'{GOOGLE_G}<section id="recenzije" class="rev-sec rev-mala" data-tekst="{e(json.dumps(L, ensure_ascii=False))}" '
+            f'data-rucno="{e(json.dumps(rucne_recenzije(jez), ensure_ascii=False))}">'
             f'<div class="w"><div class="rev-sum">'
             f'<div class="rev-poziv"><div class="rev-g"><svg width="24" height="24" aria-hidden="true"><use href="#revG"/></svg></div>'
             f'<span>{e(L["poziv"])}</span></div><div class="rev-acts">'

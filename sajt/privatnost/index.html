@@ -430,7 +430,9 @@ const ima=track.scrollWidth>track.clientWidth+2;nav.hidden=!ima}
 track.addEventListener("scroll",upd,{passive:true});addEventListener("resize",upd);upd();
 sled.onclick=()=>track.scrollBy({left:korak()});pre.onclick=()=>track.scrollBy({left:-korak()})}
 function ucitaj(){if(uradjeno)return;uradjeno=true;
-fetch("/.netlify/functions/reviews?lang="+L.lang).then(r=>r.ok?r.json():null).then(d=>{if(d&&d.reviews&&d.reviews.length)nacrtaj(d)}).catch(()=>{})}
+const rucno=sec.dataset.rucno?JSON.parse(sec.dataset.rucno):null,ima=d=>d&&d.reviews&&d.reviews.length;
+// API (kad je ključ podešen) ima prednost; inače recenzije prepisane u napravi-sajt.py
+fetch("/.netlify/functions/reviews?lang="+L.lang).then(r=>r.ok?r.json():null).catch(()=>null).then(d=>{if(ima(d))nacrtaj(d);else if(ima(rucno))nacrtaj(rucno)})}
 if("IntersectionObserver"in window){const io=new IntersectionObserver(e=>{if(e.some(x=>x.isIntersecting)){io.disconnect();ucitaj()}},{rootMargin:"800px"});io.observe(sec)}
 else addEventListener("load",ucitaj)})();
 </script><script>
