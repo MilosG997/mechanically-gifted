@@ -152,7 +152,7 @@ def recenzije_html(jez):
             f'<div class="w"><div class="rev-sum">'
             f'<div class="rev-poziv"><div class="rev-g"><svg width="24" height="24" aria-hidden="true"><use href="#revG"/></svg></div>'
             f'<span>{e(L["poziv"])}</span></div><div class="rev-acts">'
-            f'<a class="btn btn-l rev-svi" href="{e(mape)}" target="_blank" rel="noopener" hidden>{e(L["svi"])}</a>'
+            f'<a class="btn btn-l rev-svi" href="{e(mape)}" target="_blank" rel="noopener">{e(L["svi"])}</a>'
             f'<a class="btn btn-g rev-ostavi" href="{e(ostavi)}" target="_blank" rel="noopener">{e(L["ostavi"])}</a>'
             f'</div></div></div></section>\n')
 
