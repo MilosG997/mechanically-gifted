@@ -83,6 +83,11 @@ def stranica(jez):
                f'<a href="/" hreflang="sr" lang="sr"{sr_akt}>SR</a>'
                f'<a href="/en/" hreflang="en" lang="en"{en_akt}>EN</a></div>', b, count=1, flags=re.S)
 
+    # O meni posle Usluga (pre "Kako radim"), plus link u meniju
+    assert b.count("<section>") == 1
+    b = b.replace("<section>", omeni_html(jez) + "<section>", 1)
+    b, n = re.subn(r'<nav class="links"><a [^>]*href="#usluge">[^<]*</a>', lambda m: m.group(0) + '<a href="#omeni">' + OMENI[jez]["nav"] + "</a>", b, count=1)
+    assert n == 1
     # Recenzije sa Google-a iznad FAQ-a (podrazumevano mala traka; JS je zameni karticama kad ih ima)
     assert '<section id="pitanja">' in b
     b = b.replace('<section id="pitanja">', recenzije_html(jez) + '<section id="pitanja">', 1)
@@ -134,11 +139,72 @@ RECENZIJE = {
            "link": "View on Google →", "izvor": "Reviews from Google", "pre": "Previous", "sled": "Next",
            "ocena": "Rated {n} out of 5", "poziv": "Worked with me? Leave a review on Google"},
 }
+OMENI = {
+    "sr": {"nav": "O meni", "naslov": "Zdravo, ja sam Miloš", "uloga": "QA Automation Engineer · Shopify Specialist · Web Developer",
+           "klik": "Klikni da me upoznaš",
+           "p": ["Upoznaj čoveka iza Mechanically Gifted. Ja sam onaj koji pravi sajtove, sređuje Shopify prodavnice i piše testove.",
+                 "U IT industriji sam više od 10 godina. Krenuo sam 2015. kao freelancer, kroz web dizajn u Figmi i Photoshopu, razvoj i vođenje Shopify i WooCommerce prodavnica i SEO. Za to vreme sarađivao sam sa mnogo zadovoljnih klijenata i firmi, a svaki projekat mi je doneo novo znanje i nove veštine.",
+                 "Kroz testiranje sajtova i igrica pronašao sam svoje mesto u QA-u. Danas se bavim QA automatizacijom: pišem testove u Selenium-u, Appium-u, Pytest-u i Postman-u (Python i Java), za web, mobilne aplikacije i API. Sajtove i Shopify teme radim u HTML-u, CSS-u i Liquid-u. Radim samostalno, držim se rokova i ništa ne puštam uživo dok ga ne istestiram."],
+           "kraj": "Nekada sam maštao da postanem profesionalni fudbaler, a postao sam QA inženjer... Nije loše.",
+           "alati": [("Testiranje", "Selenium, Appium, Pytest, Postman"), ("Razvoj", "Python, Java, HTML, CSS, Liquid, Git"),
+                     ("E-commerce i dizajn", "Shopify, WooCommerce, Klaviyo, Figma, Photoshop, SEO")],
+           "razgovor": "Hajde da popričamo", "radovi": "Pogledaj radove →"},
+    "en": {"nav": "About", "naslov": "Hi, I'm Miloš", "uloga": "QA Automation Engineer · Shopify Specialist · Web Developer",
+           "klik": "Click to get to know me",
+           "p": ["Meet the person behind Mechanically Gifted. I'm the one who builds the websites, sets up the Shopify stores and writes the tests.",
+                 "I've been in the IT industry for more than 10 years. I started in 2015 as a freelancer, with web design in Figma and Photoshop, building and running Shopify and WooCommerce stores, and SEO. Since then I've worked with many happy clients and companies, and every project has taught me something new.",
+                 "Testing websites and games is how I found my place in QA. Today I work in QA automation: I write tests with Selenium, Appium, Pytest and Postman (Python and Java) for the web, mobile apps and APIs. I build websites and Shopify themes in HTML, CSS and Liquid. I work on my own, I stick to deadlines, and nothing goes live until I've tested it."],
+           "kraj": "I used to dream of becoming a professional footballer. I became a QA engineer instead... Not bad.",
+           "alati": [("Testing", "Selenium, Appium, Pytest, Postman"), ("Development", "Python, Java, HTML, CSS, Liquid, Git"),
+                     ("E-commerce & design", "Shopify, WooCommerce, Klaviyo, Figma, Photoshop, SEO")],
+           "razgovor": "Let's talk", "radovi": "See my work →"},
+}
+
+
+def omeni_html(jez):
+    """Sekcija O meni: zatvorena kartica sa slikom, klik otvara tekst i alate."""
+    L, e = OMENI[jez], (lambda x: html.escape(x, quote=False))
+    p = f'<p class="lead">{e(L["p"][0])}</p>' + "".join(f"<p>{e(x)}</p>" for x in L["p"][1:])
+    uloga = " · ".join(e(x).replace(" ", "&nbsp;") for x in L["uloga"].split(" · "))  # lomi se samo na tačkici
+    alati = "".join(f"<div><h4>{e(h)}</h4><p>{e(t)}</p></div>" for h, t in L["alati"])
+    return (f'<section id="omeni" class="omeni"><div class="w"><div class="ab">'
+            f'<button type="button" class="abhead" id="abBtn" aria-expanded="false" aria-controls="abBody">'
+            f'<span class="av"><span class="ring"></span><span class="pic"><img src="/img/milos.webp" alt="Miloš Grbović" '
+            f'width="240" height="240" loading="lazy" decoding="async"></span></span>'
+            f'<span class="abt"><b>{e(L["naslov"])}</b><span>{uloga}</span><em>{e(L["klik"])}</em></span>'
+            f'<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
+            f'</button><div class="abbody" id="abBody" role="region" aria-labelledby="abBtn" inert><div class="abin"><div class="abpad">'
+            f'<div class="atxt">{p}<p class="end">{e(L["kraj"])}</p></div><div class="tools">{alati}</div>'
+            f'<div class="ab-cta"><a class="btn btn-g sm" href="#kontakt">{e(L["razgovor"])}</a>'
+            f'<a class="btn btn-l sm" href="#radovi">{e(L["radovi"])}</a></div>'
+            f'</div></div></div></div></div></section>\n')
+
+
+OMENI_JS = ('(()=>{const b=document.getElementById("abBtn");if(!b)return;const a=b.closest(".ab"),t=document.getElementById("abBody");'
+            'b.addEventListener("click",()=>{const o=!a.classList.contains("open");a.classList.toggle("open",o);'
+            'b.setAttribute("aria-expanded",o);t.inert=!o})})();')
+
+
 # Recenzije prepisane sa Google profila (dok Places API ključ nije podešen). Tekst u originalu, kako je napisan.
 # Nova recenzija: dodaj stavku, ažuriraj ocenu/broj sa profila, pa napravi i objavi sajt.
 RUCNE_RECENZIJE = {
     "rating": 5.0, "userRatingCount": 8,
     "reviews": [
+        {"author": "Jovan Sindjelic", "rating": 5, "lang": "sr",
+         "text": "Brza i profesionalna usluga, odlična saradnja i sve po dogovoru. Sve preporuke!",
+         "photo": "https://lh3.googleusercontent.com/a/ACg8ocKIw0CTvEzUR4tH4XgdjT-thgy0v9fLZtjgwOI27uHJtjkpwg=w84-h84-p-rp-mo-br100",
+         "time": {"sr": "oktobar 2026.", "en": "October 2026"}},
+        {"author": "Goran Bošković", "rating": 5, "lang": "sr",
+         "text": "Bavim se sličnim stvarima i želim da preporučim momka i firmu koja se bavi mojim poslom 🙂…",
+         "time": {"sr": "oktobar 2026.", "en": "October 2026"}},
+        {"author": "Dragan Kantar", "rating": 5, "lang": "sr",
+         "text": "Licno vec duze vremena imam saradnju sa deckom cija je ovo prica na nekim drugim poslovima, tako da verujem da ce i ovde ave da bude kako treba. Podrska od mene i sve preporuke.",
+         "photo": "https://lh3.googleusercontent.com/a/ACg8ocLLBQOQzyPU-Ze8ZZ0UBEgv_-ukNkKJgBWtnBH8ZzGn7wLiZw=w84-h84-p-rp-mo-br100",
+         "time": {"sr": "oktobar 2026.", "en": "October 2026"}},
+        {"author": "Sladjana Bosnic", "rating": 5, "lang": "sr",
+         "text": "Imala sam vec jednu saradnju sa ovom firmom i za sada nemam zamerki, sve pohvale.",
+         "photo": "https://lh3.googleusercontent.com/a/ACg8ocIfcW4tHCIyvKISespo6x0DAhmI5YsnJ7YvrhLINU5NG2NgGA=w84-h84-p-rp-mo-br100",
+         "time": {"sr": "oktobar 2026.", "en": "October 2026"}},
         {"author": "Božidar Božović", "rating": 5, "lang": "bs", "text": "Podrška za nove inovacije 💪…",
          "photo": "https://lh3.googleusercontent.com/a/ACg8ocKrStb9IZz1tF8n9056qfGnoLW_v6Mq58u_J_5kGyQyQD8TAA=w84-h84-p-rp-mo-br100",
          "time": {"sr": "oktobar 2026.", "en": "October 2026"}},
@@ -330,6 +396,7 @@ else if(el.dataset.copy)mgEvent("contact_copy_click",{field:el.dataset.copy==="v
 else if(el.matches(".ctas .btn-g")&&h.endsWith("#kontakt"))mgEvent("cta_free_quote_click");
 else if(el.matches(".rev-ostavi"))mgEvent("review_leave_click",{link_location:el.closest(".rev-mala")?"strip":"reviews"});
 else if(el.matches(".rev-svi"))mgEvent("review_see_all_click");
+else if(el.id==="abBtn"&&el.getAttribute("aria-expanded")==="true")mgEvent("about_open");
 else if(stavka)mgEvent("portfolio_item_click",{item_name:stavka.querySelector("h3").textContent,link_url:el.href||""});
 else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.getAttribute("hreflang")})});
 </script>
@@ -342,7 +409,7 @@ RECENZIJE_JS = open(os.path.join(TU, "recenzije.js"), encoding="utf-8").read()
 
 def skripte(jez):
     t = T[jez]
-    return GA + "<script>\n" + PORTFOLIO_JS + "</script><script>\n" + RECENZIJE_JS + "</script>" + """<script>
+    return GA + "<script>\n" + PORTFOLIO_JS + "</script><script>\n" + RECENZIJE_JS + "</script><script>" + OMENI_JS + "</script>" + """<script>
 const C={copy:%s,ok:%s};
 document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{
 const el=document.getElementById(b.dataset.copy);

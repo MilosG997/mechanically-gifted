@@ -36,7 +36,18 @@ const kar=[...track.children],tacke=[...dots.children],korak=()=>kar[0].offsetWi
 function upd(){const i=Math.round(track.scrollLeft/korak());tacke.forEach((t,k)=>t.classList.toggle("on",k===Math.min(i,tacke.length-1)));
 const ima=track.scrollWidth>track.clientWidth+2;nav.hidden=!ima}
 track.addEventListener("scroll",upd,{passive:true});addEventListener("resize",upd);upd();
-sled.onclick=()=>track.scrollBy({left:korak()});pre.onclick=()=>track.scrollBy({left:-korak()})}
+sled.onclick=()=>{track.scrollBy({left:korak()});kreni()};pre.onclick=()=>{track.scrollBy({left:-korak()});kreni()};
+// Samo se vrti na 5 s (posle poslednje vraća na prvu); staje dok je prst/miš/fokus na karticama, kad nije na ekranu
+// ili kad je neko otvorio "Prikaži još". Bez vrtenja ako korisnik ne želi animacije.
+let tajmer=null,ruka=false,vidi=false;const mir=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function dalje(){if(ruka||!vidi||document.hidden||track.querySelector(".rev-txt.open"))return;
+if(track.scrollLeft+track.clientWidth>=track.scrollWidth-4)track.scrollTo({left:0});else track.scrollBy({left:korak()})}
+function kreni(){clearInterval(tajmer);if(!mir&&!nav.hidden)tajmer=setInterval(dalje,5000)}
+const stani=()=>{ruka=true},pusti=()=>{ruka=false;kreni()};
+wrap.addEventListener("pointerenter",e=>{if(e.pointerType==="mouse")stani()});wrap.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")pusti()});
+track.addEventListener("touchstart",stani,{passive:true});track.addEventListener("touchend",()=>setTimeout(pusti,3000),{passive:true});
+wrap.addEventListener("focusin",e=>{if(e.target.matches(":focus-visible"))stani()});wrap.addEventListener("focusout",pusti);
+new IntersectionObserver(e=>{vidi=e[0].isIntersecting}).observe(track);addEventListener("resize",kreni);kreni()}
 function ucitaj(){if(uradjeno)return;uradjeno=true;
 const rucno=sec.dataset.rucno?JSON.parse(sec.dataset.rucno):null,ima=d=>d&&d.reviews&&d.reviews.length;
 // API (kad je ključ podešen) ima prednost; inače recenzije prepisane u napravi-sajt.py
