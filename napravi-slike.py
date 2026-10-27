@@ -42,6 +42,7 @@ PROJEKTI = {  # snimci početnih strana (isečke i veličine određuje portfolio
     "tiptoe": "https://tiptoeboutique.com/",
     "eskay": "https://eskayproducts.com/",
     "majstori": "https://majstoripazova.rs/",
+    "draganic": "https://draganicstolarija.rs/",
     "qa": fajl("qa.html"),
 }
 for ime, url in PROJEKTI.items():
