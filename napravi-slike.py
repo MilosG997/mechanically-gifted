@@ -41,6 +41,7 @@ PROJEKTI = {  # snimci početnih strana (isečke i veličine određuje portfolio
     "hosiery": "https://hosieryplus.com/",
     "tiptoe": "https://tiptoeboutique.com/",
     "eskay": "https://eskayproducts.com/",
+    "gfp": "https://gfpgloves.com/",
     "majstori": "https://majstoripazova.rs/",
     "draganic": "https://draganicstolarija.rs/",
     "qa": fajl("qa.html"),
