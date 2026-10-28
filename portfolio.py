@@ -35,7 +35,6 @@ FOLDERI = [
           "izvor": [("snimci", "tiptoe", None)]},
          {"slug": "gfp-gloves", "naslov": "GFP Gloves", "link": "https://gfpgloves.com/",
           "link_tekst": {"sr": "Pogledaj GFP Gloves", "en": "View GFP Gloves"},
-          "status": {"sr": "U toku", "en": "In progress"},
           "opis": {"sr": "Kompletno vođenje Shopify prodavnice za brend zaštitnih rukavica: redizajn teme, izmene u HTML-u i Liquid-u, Klaviyo email marketing i organizacija proizvoda i kolekcija.",
                    "en": "Full Shopify store management for a protective gloves brand: theme redesign, HTML and Liquid customization, Klaviyo email marketing, and product and collection setup."},
           "alt": {"sr": "GFP Gloves – Shopify prodavnica", "en": "GFP Gloves – Shopify store"},

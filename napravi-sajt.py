@@ -272,10 +272,7 @@ def portfolio_html(jez):
                 tekst = jezik(s_.get("link_tekst", {"sr": f'{rec["pogledaj"]} {naslov}', "en": f'{rec["pogledaj"]} {naslov}'}), jez)
                 akcija = f'<a href="{s_["link"]}" target="_blank" rel="noopener">{e(tekst)}</a>'
             oznaka = f'<small class="oznaka">{e(s_["oznaka"][jez])}</small>' if "oznaka" in s_ else ""
-            # bedž "U toku" stoji pored naslova, ali van <h3> (GA šalje tekst iz h3 kao naziv rada)
-            naziv = (f'<div class="naziv"><h3>{e(naslov)}</h3><span class="status"><i aria-hidden="true"></i>'
-                     f'{e(s_["status"][jez])}</span></div>' if "status" in s_ else f'<h3>{e(naslov)}</h3>')
-            stavke.append(f'<div class="item">{slika}<div>{naziv}{oznaka}'
+            stavke.append(f'<div class="item">{slika}<div><h3>{e(naslov)}</h3>{oznaka}'
                           f'<p>{e(s_["opis"][jez])}</p>{akcija}</div></div>')
         out.append(
             f'<div class="f" data-folder="{k}"><button type="button" class="head" id="fh-{k}" aria-expanded="false" '
