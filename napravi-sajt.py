@@ -3,7 +3,7 @@
 import html, json, os, re
 
 DOMEN = "https://mechanicallygifted.rs"
-EMAIL = "mechanicallygifted@gmail.com"
+EMAIL = "mechanicallygifted97@gmail.com"
 TEL_PRIKAZ = "+381 69 3329 029"
 TEL = "+381693329029"
 GA_ID = "G-STL2YKYT85"
