@@ -15,6 +15,7 @@ def figma(slug, naslov, opis, alt, izvori, oznaka=CLIENT, folder="figma"):
 
 FOLDERI = [
     {"key": "shopify", "naziv": {"sr": "Shopify", "en": "Shopify"},
+     "stat": {"sr": ("100+", "zadovoljnih klijenata"), "en": ("100+", "happy clients")},
      "opis": {"sr": "Web prodavnice, teme, merchandising i email marketing",
               "en": "Online stores, themes, merchandising and email marketing"},
      "stavke": [
@@ -57,6 +58,7 @@ FOLDERI = [
           "izvor": [("snimci", "draganic", None)]},
      ]},
     {"key": "dizajn", "naziv": {"sr": "Web dizajn", "en": "Web design"},
+     "stat": {"sr": ("1.000+", "uspešnih radova"), "en": ("1,000+", "successful projects")},
      "opis": {"sr": "Dizajni u Figmi", "en": "Figma designs"},
      "stavke": [
          figma("shopnosis", "Shopnosis",
@@ -129,6 +131,7 @@ FOLDERI = [
                ["1-41045", "1-40132", "1-39917", "1-37924"], oznaka=KONCEPT),
      ]},
     {"key": "qa", "naziv": {"sr": "QA testiranje", "en": "QA testing"},
+     "stat": {"sr": ("2.000+", "uspešnih test case-ova"), "en": ("2,000+", "passed test cases")},
      "opis": {"sr": "Automatski testovi", "en": "Automated tests"},
      "stavke": [
          {"slug": "qa-automation", "naslov": {"sr": "QA testovi i GitHub", "en": "QA tests and GitHub"},

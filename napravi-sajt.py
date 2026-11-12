@@ -29,39 +29,32 @@ izvor = open(os.path.join(TU, "dizajn.html"), encoding="utf-8").read()
 m = re.search(r"const T=\{en:(\{.*?\}),sr:(\{.*?\})\};", izvor, re.S)
 T = {"en": json.loads(m.group(1)), "sr": json.loads(m.group(2))}
 
-# Fontovi (OFL licenca, sajt/fonts). Geist je UGRAĐEN u stranicu (base64): tekst odmah ima pravi font,
-# bez čekanja na preuzimanje na sporoj mreži (najveći element = uvodni pasus). Na srpskoj strani ugrađen je
-# i deo sa č/ć/đ/š/ž. Geist Mono (sitne oznake) se preuzima posebno, sa swap — ne zadržava prikaz.
-LAT = ("U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,"
-       "U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD")
-LAT_EXT = ("U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,"
-           "U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF")
-
-
-def _font_src(fajl, deo, ugradi):
-    putanja = os.path.join(TU, "sajt", "fonts", f"{fajl}-{deo}-wght-normal.woff2")
-    if ugradi:
-        import base64
-        return "url(data:font/woff2;base64," + base64.b64encode(open(putanja, "rb").read()).decode() + ")"
-    return f"url(/fonts/{fajl}-{deo}-wght-normal.woff2)"
+# Fontovi (OFL licenca, sajt/fonts; prave ih napravi-fontove.py). Naslovni serif (i kosi) i tekstualni font su
+# UGRAĐENI u stranicu (base64): naslov i uvodni pasus odmah imaju pravi font, bez čekanja na mrežu. Mono (sitne
+# oznake) se preuzima posebno, sa swap, pa ne zadržava prikaz. Svaki fajl ima latinicu i srpska slova.
+FONTOVI = [  # (porodica, fajl, stil, debljina, ugrađen)
+    ("MG Serif", "mg-serif", "normal", "400", True),
+    ("MG Serif", "mg-serif-i", "italic", "400", True),
+    ("MG Sans", "mg-sans", "normal", "400 700", True),
+    ("MG Mono", "mg-mono", "normal", "450", False),
+]
 
 
 def fontovi(jez):
+    import base64
     out = []
-    for ime, fajl in (("Geist", "geist"), ("Geist Mono", "geist-mono")):
-        for deo, opseg in (("latin", LAT), ("latin-ext", LAT_EXT)):
-            ugradi = fajl == "geist" and (deo == "latin" or jez == "sr")
-            out.append(f'@font-face{{font-family:"{ime}";font-style:normal;font-weight:100 900;font-display:swap;'
-                       f'src:{_font_src(fajl, deo, ugradi)} format("woff2");unicode-range:{opseg}}}\n')
+    for ime, fajl, stil, tezina, ugradi in FONTOVI:
+        put = os.path.join(TU, "sajt", "fonts", fajl + ".woff2")
+        src = ("url(data:font/woff2;base64," + base64.b64encode(open(put, "rb").read()).decode() + ")") if ugradi \
+            else f"url(/fonts/{fajl}.woff2)"
+        out.append(f'@font-face{{font-family:"{ime}";font-style:{stil};font-weight:{tezina};font-display:swap;'
+                   f'src:{src} format("woff2")}}\n')
     return "".join(out)
 
 
 css = open(os.path.join(TU, "stil.css"), encoding="utf-8").read()
 
 telo = re.search(r"(<header>.*?</footer>)", izvor, re.S).group(1)
-# "</>" se u HTML-u ne prikazuje (parser ga baci) — ikonica Shopify kartice je bila prazna
-telo = telo.replace('<div class="ico"></></div>', '<div class="ico">&lt;/&gt;</div>')
-# Kanvas mreže pauzira se kad hero nije na ekranu (vidi skriptu dole)
 
 
 def stranica(jez):
@@ -84,10 +77,16 @@ def stranica(jez):
                f'<a href="/en/" hreflang="en" lang="en"{en_akt}>EN</a></div>', b, count=1, flags=re.S)
 
     # O meni posle Usluga (pre "Kako radim"), plus link u meniju
-    assert b.count("<section>") == 1
-    b = b.replace("<section>", omeni_html(jez) + "<section>", 1)
-    b, n = re.subn(r'<nav class="links"><a [^>]*href="#usluge">[^<]*</a>', lambda m: m.group(0) + '<a href="#omeni">' + OMENI[jez]["nav"] + "</a>", b, count=1)
+    assert b.count('<section class="koraci">') == 1
+    b = b.replace('<section class="koraci">', omeni_html(jez) + '<section class="koraci">', 1)
+    b, n = re.subn(r'<nav class="links"[^>]*><a [^>]*href="#usluge">[^<]*</a>', lambda m: m.group(0) + '<a href="#omeni">' + OMENI[jez]["nav"] + "</a>", b, count=1)
     assert n == 1
+    # Delovi koje pravi Python: nacrt zupčanika, oznaka QA skena, alati, velika traka teksta; 3D modul sa verzijom
+    for oznaka, deo in (("<!--NACRT-->", NACRT), ("<!--SKEN-->", sken_html(jez)), ("<!--ALATI-->", alati_html(jez)),
+                        ):
+        assert b.count(oznaka) == 1, oznaka
+        b = b.replace(oznaka, deo, 1)
+    b = b.replace('<div class="scena" aria-hidden="true"></div>', f'<div class="scena" aria-hidden="true" data-js="{HERO3D}"></div>', 1)
     # Recenzije sa Google-a iznad FAQ-a (podrazumevano mala traka; JS je zameni karticama kad ih ima)
     assert '<section id="pitanja">' in b
     b = b.replace('<section id="pitanja">', recenzije_html(jez) + '<section id="pitanja">', 1)
@@ -96,35 +95,164 @@ def stranica(jez):
     assert "<!--PORTFOLIO-->" in b
     b = b.replace("<!--PORTFOLIO-->", portfolio_html(jez), 1)
 
-    # Podnožje: email, GitHub, drugi jezik
-    drugi = ('<a href="/en/" hreflang="en" lang="en">English</a>' if jez == "sr"
-             else '<a href="/" hreflang="sr" lang="sr">Srpski</a>')
-    b = re.sub(r'<footer><div class="w"><span>(.*?)</span><span>(.*?)</span></div></footer>',
-               # bez zemlje na kraju; usluge su poseban deo koji na telefonu ide u svoj red (ceo)
-               lambda mm: f'<footer><div class="w"><span class="ft"><span>{mm.group(1)}</span>'
-                          f'<span class="ft-usl">{re.sub(r" · (Srbija|Serbia)$", "", mm.group(2))}</span></span><nav>'
-                          f'<a href="mailto:{EMAIL}">Email</a>'
-                          f'<a href="{LINKOVI["GitHub"]}" target="_blank" rel="noopener">GitHub</a>'
-                          f'{drugi}<a href="{PRIVATNOST[jez]}">{"Privatnost" if jez == "sr" else "Privacy"}</a>'
-                          f'</nav></div></footer>', b, flags=re.S)
-    assert "<nav><a href=\"mailto" in b
+    # Podnožje: veliko, u tonovima zaglavlja (podnozje_html)
+    b, n = re.subn(r"<footer>.*?</footer>", lambda mm: podnozje_html(jez), b, count=1, flags=re.S)
+    assert n == 1
 
     # Kontakt: mailto, tel, bez LinkedIn-a, Viber i WhatsApp dugmad
     b = b.replace('<span id="v0">kontakt@mechanicallygifted.rs</span>',
                   f'<span id="v0"><a href="mailto:{EMAIL}">{EMAIL}</a></span>')
     b = b.replace('<span id="v1">+381 6X XXX XXXX</span>',
                   f'<span id="v1"><a href="tel:{TEL}">{TEL_PRIKAZ}</a></span>')
-    b = re.sub(r'<div class="c"><div><small>LinkedIn</small>.*?</button></div>', '', b, flags=re.S)
-    b = b.replace('</div></div></div></section>\n</main>',
-                  '<div class="apps">'
+    assert b.count("<!--APPS-->") == 1
+    b = b.replace("<!--APPS-->", '<div class="apps">'
                   f'<a class="btn btn-l" href="viber://chat?number=%2B{TEL[1:]}">Viber</a>'
                   f'<a class="btn btn-l" href="https://wa.me/{TEL[1:]}" target="_blank" rel="noopener">WhatsApp</a>'
-                  '</div></div></div></div></section>\n</main>', 1)
-    assert "apps" in b and "LinkedIn" not in b
+                  '</div>', 1)
     if jez == "en":  # ova oznaka nije bila u rečniku
         b = b.replace("<small>Telefon · Viber · WhatsApp</small>", "<small>Phone · Viber · WhatsApp</small>")
     b = b.replace("</main>", "</main>\n" + galerija_json(jez), 1)
-    return b
+    return IKONICE + b
+
+
+# Ikonice alata: Simple Icons 16.35.0 (CC0, izvor-ikonica/*.svg) + tri nacrtane ovde (Liquid, Klaviyo, Photoshop).
+# Boje su boje brendova (svetlije gde bi se na tamnoj podlozi izgubile); vide se kad se pređe mišem.
+ALATI = {  # ime: (ikonica, boja)
+    "Shopify": ("shopify", "#7AB55C"), "Liquid": ("liquid", "#95BF47"), "HTML": ("html5", "#E34F26"),
+    "CSS": ("css", "#9B6BDF"), "JavaScript": ("javascript", "#F7DF1E"), "Python": ("python", "#5A9FD4"),
+    "Java": ("openjdk", "#F89820"), "Git": ("git", "#F05032"), "GitHub": ("github", "#FFFFFF"),
+    "Netlify": ("netlify", "#00C7B7"), "Firebase": ("firebase", "#FFCA28"), "WooCommerce": ("woocommerce", "#B07CAB"),
+    "Selenium": ("selenium", "#43B02A"), "Pytest": ("pytest", "#0A9EDC"), "Appium": ("appium", "#EE376D"),
+    "Postman": ("postman", "#FF6C37"), "GitHub Actions": ("githubactions", "#2088FF"), "Klaviyo": ("klaviyo", "#F2F2F2"),
+    "Figma": ("figma", "#F24E1E"), "Photoshop": ("photoshop", "#31A8FF"), "Google Analytics": ("googleanalytics", "#E37400"),
+    "Search Console": ("googlesearchconsole", "#458CF5"), "SEO": ("googlesearchconsole", "#458CF5"),
+}
+RED_ALATA = [["Shopify", "Liquid", "HTML", "CSS", "JavaScript", "Python", "Java", "Git", "GitHub", "Netlify", "Firebase", "WooCommerce"],
+             ["Selenium", "Pytest", "Appium", "Postman", "GitHub Actions", "Klaviyo", "Figma", "Photoshop", "Google Analytics", "Search Console"]]
+NACRTANE = {
+    "liquid": '<path fill-rule="evenodd" d="M12 2.2c.3 0 .5.1.7.4 3.1 4.3 6.3 8.3 6.3 12a7 7 0 0 1-14 0c0-3.7 3.2-7.7 6.3-12 .2-.3.4-.4.7-.4zm-3.2 12.3c-.5 0-.9.4-.9.9a4.2 4.2 0 0 0 4.1 4.2c.5 0 .9-.4.9-.9s-.4-.9-.9-.9c-1.3 0-2.3-1.1-2.3-2.4 0-.5-.4-.9-.9-.9z"/>',
+    "klaviyo": '<path d="M2.5 3.5h19l-5.2 8.5 5.2 8.5h-19z"/>',
+    "photoshop": '<rect x="2" y="2" width="20" height="20" rx="4.5"/><text x="12" y="16.2" text-anchor="middle" font-family="MG Mono,monospace" font-size="9.5" fill="#050a1a">Ps</text>',
+}
+
+
+def _ikonica(slug):
+    if slug in NACRTANE:
+        return NACRTANE[slug]
+    svg = open(os.path.join(TU, "izvor-ikonica", slug + ".svg"), encoding="utf-8").read()
+    return f'<path d="{re.search(r"<path d=\"([^\"]+)\"", svg).group(1)}"/>'
+
+
+IKONICE = ('<svg width="0" height="0" style="position:absolute" aria-hidden="true">'
+           + "".join(f'<symbol id="i-{slug}" viewBox="0 0 24 24">{_ikonica(slug)}</symbol>'
+                     for slug in sorted({v[0] for v in ALATI.values()})) + "</svg>\n")
+ALATI_TEKST = {"sr": ("Alati sa kojima radim", "{n} alata"), "en": ("Tools I work with", "{n} tools")}
+
+
+def alati_html(jez):
+    """Dve trake logotipa koje teku u suprotnim smerovima; svaka traka je 3 puta ista (bez praznine na širokom ekranu)."""
+    naslov, broj = ALATI_TEKST[jez]
+    stavka = lambda ime: (f'<span class="alat" style="--c:{ALATI[ime][1]}"><svg aria-hidden="true">'
+                          f'<use href="#i-{ALATI[ime][0]}"/></svg>{html.escape(ime)}</span>')
+    redovi = []
+    for i, red in enumerate(RED_ALATA):
+        jedan = "".join(stavka(x) for x in red)
+        redovi.append(f'<div class="mq{" mq-r" if i else ""}"><div class="mq-in">{jedan}</div>'
+                      f'<div class="mq-in" aria-hidden="true">{jedan}</div><div class="mq-in" aria-hidden="true">{jedan}</div></div>')
+    ukupno = sum(len(r) for r in RED_ALATA)
+    return (f'<div class="alati" role="region" aria-label="{naslov}"><div class="w alati-zag"><span class="eye">{naslov}</span>'
+            f'</div>{"".join(redovi)}</div>')
+
+
+VELIKI = {"sr": ["Shopify", "Web dizajn", "QA testiranje", "SEO", "Sajtovi"],
+          "en": ["Shopify", "Web design", "QA testing", "SEO", "Websites"]}
+
+
+def veliki_html(jez):
+    reci = "".join(f"<span>{w}</span><b>✦</b>" for w in VELIKI[jez])
+    return f'<div class="veliki" aria-hidden="true"><div class="veliki-in">{reci * 3}</div></div>'
+
+
+SKEN = {"sr": {"pre": "QA sken · spreman", "radi": "QA sken {n} · proverava…", "prosao": "QA sken {n} · PASS ✓"},
+        "en": {"pre": "QA scan · ready", "radi": "QA scan {n} · running…", "prosao": "QA scan {n} · PASS ✓"}}
+
+
+def sken_html(jez):
+    t = SKEN[jez]
+    return f'<span class="sken" aria-hidden="true" data-radi="{t["radi"]}" data-prosao="{t["prosao"]}">{t["pre"]}</span>'
+
+
+def nacrt_svg():
+    """Plavi nacrt zupčanika: iscrta se odmah (bez JS-a), a kad se 3D učita ostaje kao bled crtež iza metala."""
+    import math
+
+    def zupcanik(cx, cy, n, s, sektori=0):
+        m = 0.16 * s
+        rp, k = m * n / 2, 2 * math.pi / n
+        ra, rf = rp + m, rp - 1.25 * m
+        P = lambda r, a: (cx + r * math.cos(a), cy + r * math.sin(a))  # noqa: E731
+        f = lambda p: f"{p[0]:.1f} {p[1]:.1f}"  # noqa: E731
+        d = ""
+        for i in range(n):
+            a = i * k
+            d += ("M" if i == 0 else "L") + f(P(rf, a - k * .27)) + "Q" + f(P(rp, a - k * .25)) + " " + f(P(ra, a - k * .13))
+            d += "L" + f(P(ra, a + k * .13)) + "Q" + f(P(rp, a + k * .25)) + " " + f(P(rf, a + k * .27))
+        el = [f'<path class="lin" pathLength="1" d="{d}Z"/>',
+              f'<circle class="lin tank" cx="{cx:.1f}" cy="{cy:.1f}" r="{rp:.1f}"/>']
+        if sektori:
+            r1, r2, sir, krak = rp * .42, rf - rp * .16, 2 * math.pi / sektori, .24 * s / rp
+            for i in range(sektori):
+                a0, a1 = i * sir + krak, (i + 1) * sir - krak
+                el.append(f'<path class="lin" pathLength="1" d="M{f(P(r2, a0))}A{r2:.1f} {r2:.1f} 0 0 1 {f(P(r2, a1))}'
+                          f'L{f(P(r1, a1))}A{r1:.1f} {r1:.1f} 0 0 0 {f(P(r1, a0))}Z"/>')
+        return el, ra
+
+    cx, cy, s = 330, 320, 92
+    g1, ra1 = zupcanik(cx, cy, 30, s, sektori=6)
+    g1 += [f'<circle class="lin" pathLength="1" cx="{cx}" cy="{cy}" r="{1.06 * s:.1f}"/>',
+           f'<circle class="lin" pathLength="1" cx="{cx}" cy="{cy}" r="{.32 * s:.1f}"/>']
+    ugao, d = -0.62, (0.16 * 30 / 2 + 0.16 * 14 / 2) * s
+    x2, y2 = cx + d * math.cos(ugao), cy + d * math.sin(ugao)
+    g2, ra2 = zupcanik(x2, y2, 14, s)
+    g2 += [f'<circle class="lin" pathLength="1" cx="{x2:.1f}" cy="{y2:.1f}" r="{.16 * s:.1f}"/>']
+    mere = [  # osne linije, kotna linija prečnika, oznake
+        f'<path class="lin tank" d="M{cx - ra1 - 60} {cy}H{x2 + ra2 + 40}M{cx} {cy - ra1 - 50}V{cy + ra1 + 70}"/>',
+        f'<path class="lin" pathLength="1" d="M{cx - ra1:.1f} {cy + ra1 + 40:.1f}H{cx + ra1:.1f}M{cx - ra1:.1f} {cy + ra1 + 32:.1f}v16M{cx + ra1:.1f} {cy + ra1 + 32:.1f}v16"/>',
+        f'<text class="mera" x="{cx}" y="{cy + ra1 + 32:.1f}" text-anchor="middle">Ø {2 * ra1:.0f} · Z 30 · m 0.16</text>',
+        f'<text class="mera" x="{x2 + ra2 + 14:.1f}" y="{y2 - ra2:.1f}">DETALJ A · Z 14</text>',
+        f'<text class="mera" x="{cx - ra1 - 60}" y="{cy - 12}">MG-01 / A–A</text>',
+    ]
+    return (f'<svg viewBox="0 0 680 680" aria-hidden="true" focusable="false"><g class="okret">{"".join(g1)}</g>'
+            f'<g class="okret2" style="transform-origin:{x2:.1f}px {y2:.1f}px">{"".join(g2)}</g>{"".join(mere)}</svg>')
+
+
+NACRT = nacrt_svg()
+# 3D modul (3d/: npm run build) sa verzijom u adresi, da pregledač uzme novi čim se promeni
+import hashlib  # noqa: E402
+HERO3D = "/js/hero3d.js?v=" + hashlib.md5(open(os.path.join(TU, "sajt", "js", "hero3d.js"), "rb").read()).hexdigest()[:10]
+
+PODNOZJE = {"sr": {"kontakt": "Kontakt", "odgovor": "Odgovaram isti dan.", "sajt": "Sajt", "linkovi": "Linkovi",
+                   "vrh": "Na vrh ↑", "priv": "Privatnost", "drugi": ('/en/', "en", "English")},
+            "en": {"kontakt": "Contact", "odgovor": "I reply the same day.", "sajt": "Site", "linkovi": "Links",
+                   "vrh": "Back to top ↑", "priv": "Privacy", "drugi": ("/", "sr", "Srpski")}}
+
+
+def podnozje_html(jez):
+    """Podnožje u tonovima zaglavlja: kontakt, meni, linkovi, veliki natpis i donja traka."""
+    t, P = T[jez], PODNOZJE[jez]
+    meni = [("#usluge", t["nav.s"]), ("#omeni", OMENI[jez]["nav"]), ("#radovi", t["nav.w"]), ("#pitanja", t["nav.f"]),
+            ("#kontakt", t["nav.c"])]
+    url, hl, ime = P["drugi"]
+    usluge = re.sub(r" · (Srbija|Serbia)$", "", t["ft"])
+    return (f'<footer><div class="w"><div class="ft-top"><div class="ft-brend"><b>Mechanically <em>Gifted</em></b>'
+            f'<span>{html.escape(usluge)}</span></div>'
+            f'<nav class="ft-kol" aria-label="{P["sajt"]}"><h4>{P["sajt"]}</h4>'
+            + "".join(f'<a href="{h}">{html.escape(x)}</a>' for h, x in meni) + '</nav>'
+            f'<nav class="ft-kol" aria-label="{P["linkovi"]}"><h4>{P["linkovi"]}</h4><a href="mailto:{EMAIL}">Email</a>'
+            f'<a href="{LINKOVI["GitHub"]}" target="_blank" rel="noopener">GitHub</a>'
+            f'<a href="{url}" hreflang="{hl}" lang="{hl}">{ime}</a><a href="{PRIVATNOST[jez]}">{P["priv"]}</a></nav></div></div>'
+            f'<div class="w ft-bot"><span>© 2026 Mechanically Gifted</span>'
+            f'<a class="na-vrh" href="#top">{P["vrh"]}</a></div></footer>')
 
 
 RECENZIJE = {
@@ -143,31 +271,36 @@ OMENI = {
     "sr": {"nav": "O meni", "naslov": "Zdravo, ja sam Miloš", "uloga": "QA Automation Engineer · Shopify Specialist · Web Developer",
            "klik": "Klikni da me upoznaš",
            "p": ["Upoznaj čoveka iza Mechanically Gifted. Ja sam onaj koji pravi sajtove, sređuje Shopify prodavnice i piše testove.",
-                 "U IT industriji sam više od 10 godina. Krenuo sam 2015. kao freelancer, kroz web dizajn u Figmi i Photoshopu, razvoj i vođenje Shopify i WooCommerce prodavnica i SEO. Za to vreme sarađivao sam sa mnogo zadovoljnih klijenata i firmi, a svaki projekat mi je doneo novo znanje i nove veštine.",
-                 "Kroz testiranje sajtova i igrica pronašao sam svoje mesto u QA-u. Danas se bavim QA automatizacijom: pišem testove u Selenium-u, Appium-u, Pytest-u i Postman-u (Python i Java), za web, mobilne aplikacije i API. Sajtove i Shopify teme radim u HTML-u, CSS-u i Liquid-u. Radim samostalno, držim se rokova i ništa ne puštam uživo dok ga ne istestiram."],
+                 "U IT-ju sam više od 10 godina. Krenuo sam 2015. kao freelancer: web dizajn u Figmi i Photoshopu, Shopify i WooCommerce prodavnice i SEO. Svaki projekat mi je doneo novo znanje.",
+                 "Kroz testiranje sajtova i igrica našao sam svoje mesto u QA-u. Danas pišem automatske testove u Selenium-u, Appium-u, Pytest-u i Postman-u (Python i Java) za web, mobilne aplikacije i API. Radim samostalno, držim se rokova i ništa ne puštam uživo dok ga ne istestiram."],
            "kraj": "Nekada sam maštao da postanem profesionalni fudbaler, a postao sam QA inženjer... Nije loše.",
-           "alati": [("Testiranje", "Selenium, Appium, Pytest, Postman"), ("Razvoj", "Python, Java, HTML, CSS, Liquid, Git"),
-                     ("E-commerce i dizajn", "Shopify, WooCommerce, Klaviyo, Figma, Photoshop, SEO")],
+           "alati": [("Testiranje", ["Selenium", "Appium", "Pytest", "Postman"]),
+                     ("Razvoj", ["Python", "Java", "HTML", "CSS", "Liquid", "Git"]),
+                     ("E-commerce i dizajn", ["Shopify", "WooCommerce", "Klaviyo", "Figma", "Photoshop", "SEO"])],
            "razgovor": "Hajde da popričamo", "radovi": "Pogledaj radove →"},
     "en": {"nav": "About", "naslov": "Hi, I'm Miloš", "uloga": "QA Automation Engineer · Shopify Specialist · Web Developer",
            "klik": "Click to get to know me",
            "p": ["Meet the person behind Mechanically Gifted. I'm the one who builds the websites, sets up the Shopify stores and writes the tests.",
-                 "I've been in the IT industry for more than 10 years. I started in 2015 as a freelancer, with web design in Figma and Photoshop, building and running Shopify and WooCommerce stores, and SEO. Since then I've worked with many happy clients and companies, and every project has taught me something new.",
-                 "Testing websites and games is how I found my place in QA. Today I work in QA automation: I write tests with Selenium, Appium, Pytest and Postman (Python and Java) for the web, mobile apps and APIs. I build websites and Shopify themes in HTML, CSS and Liquid. I work on my own, I stick to deadlines, and nothing goes live until I've tested it."],
+                 "I've been in IT for more than 10 years. I started in 2015 as a freelancer: web design in Figma and Photoshop, Shopify and WooCommerce stores, and SEO. Every project taught me something new.",
+                 "Testing websites and games is how I found my place in QA. Today I write automated tests with Selenium, Appium, Pytest and Postman (Python and Java) for the web, mobile apps and APIs. I work on my own, I stick to deadlines, and nothing goes live until I've tested it."],
            "kraj": "I used to dream of becoming a professional footballer. I became a QA engineer instead... Not bad.",
-           "alati": [("Testing", "Selenium, Appium, Pytest, Postman"), ("Development", "Python, Java, HTML, CSS, Liquid, Git"),
-                     ("E-commerce & design", "Shopify, WooCommerce, Klaviyo, Figma, Photoshop, SEO")],
+           "alati": [("Testing", ["Selenium", "Appium", "Pytest", "Postman"]),
+                     ("Development", ["Python", "Java", "HTML", "CSS", "Liquid", "Git"]),
+                     ("E-commerce & design", ["Shopify", "WooCommerce", "Klaviyo", "Figma", "Photoshop", "SEO"])],
            "razgovor": "Let's talk", "radovi": "See my work →"},
 }
 
 
 def omeni_html(jez):
-    """Sekcija O meni: zatvorena kartica sa slikom, klik otvara tekst i alate."""
+    """Sekcija O meni: zatvorena kartica sa slikom, klik otvara tekst i alate (čipovi sa ikonicama)."""
     L, e = OMENI[jez], (lambda x: html.escape(x, quote=False))
     p = f'<p class="lead">{e(L["p"][0])}</p>' + "".join(f"<p>{e(x)}</p>" for x in L["p"][1:])
     uloga = " · ".join(e(x).replace(" ", "&nbsp;") for x in L["uloga"].split(" · "))  # lomi se samo na tačkici
-    alati = "".join(f"<div><h4>{e(h)}</h4><p>{e(t)}</p></div>" for h, t in L["alati"])
-    return (f'<section id="omeni" class="omeni"><div class="w"><div class="ab">'
+    cip = lambda ime: (f'<span class="cip"><svg aria-hidden="true"><use href="#i-{ALATI[ime][0]}"/></svg>{e(ime)}</span>'
+                       if ime in ALATI else f'<span class="cip">{e(ime)}</span>')
+    alati = "".join(f"<div><h4>{e(h)}</h4><p>{''.join(cip(x) for x in imena)}</p></div>" for h, imena in L["alati"])
+    return (f'<section id="omeni" class="omeni"><div class="w"><div class="sh" data-r><div class="eye" data-n="02">{e(L["nav"])}</div></div>'
+            f'<div class="ab">'
             f'<button type="button" class="abhead" id="abBtn" aria-expanded="false" aria-controls="abBody">'
             f'<span class="av"><span class="ring"></span><span class="pic"><img src="/img/milos.webp" alt="Miloš Grbović" '
             f'width="240" height="240" loading="lazy" decoding="async"></span></span>'
@@ -261,6 +394,7 @@ def portfolio_html(jez):
            '</linearGradient></defs></svg><div class="folders">']
     for f in FOLDERI:
         k = f["key"]
+        stat = (f'<p class="f-stat"><b>{e(f["stat"][jez][0])}</b> {e(f["stat"][jez][1])}</p>' if "stat" in f else "")
         stavke = []
         for s_ in f["stavke"]:
             naslov = jezik(s_["naslov"], jez)
@@ -279,7 +413,7 @@ def portfolio_html(jez):
             f'aria-controls="fb-{k}">{IKONA}<span class="t"><b>{e(f["naziv"][jez])}</b><span>{e(f["opis"][jez])}</span></span>'
             f'<span class="cnt">{len(f["stavke"])}</span>{STRELICA}</button>'
             f'<div class="body" id="fb-{k}" role="region" aria-labelledby="fh-{k}" inert><div class="inner">'
-            f'<div class="list">{"".join(stavke)}</div></div></div></div>')
+            f'{stat}<div class="list">{"".join(stavke)}</div></div></div></div>')
     out.append("</div>")
     return "".join(out)
 
@@ -371,6 +505,7 @@ def glava(jez, k=None, noindex=False, par=("/", "/en/"), ld=None):
 <meta name="twitter:description" content="{e(k["desc"])}">
 <meta name="twitter:image" content="{DOMEN}/og-image.png">
 <script type="application/ld+json">{json.dumps(ld if ld_strana is None else ld_strana, ensure_ascii=False)}</script>
+<script>document.documentElement.classList.add("js")</script>
 <style>{fontovi(jez)}{css}</style>
 </head>
 <body>
@@ -405,6 +540,7 @@ else if(el.hasAttribute("hreflang"))mgEvent("language_switch",{language_to:el.ge
 
 PORTFOLIO_JS = open(os.path.join(TU, "portfolio.js"), encoding="utf-8").read()
 RECENZIJE_JS = open(os.path.join(TU, "recenzije.js"), encoding="utf-8").read()
+POKRET_JS = open(os.path.join(TU, "pokret.js"), encoding="utf-8").read()
 
 
 def skripte(jez):
@@ -416,26 +552,8 @@ const el=document.getElementById(b.dataset.copy);
 const ok=()=>{b.textContent=C.ok;setTimeout(()=>b.textContent=C.copy,1600)};
 const sel=()=>{const r=document.createRange();r.selectNodeContents(el);const s=getSelection();s.removeAllRanges();s.addRange(r)};
 try{navigator.clipboard.writeText(el.textContent).then(ok,sel)}catch(e){sel()}}));
-</script><script>
-// Animirana mreža: u hederu (#net) i iza kontakt bloka (.mreza); svaka radi samo dok je na ekranu
-document.querySelectorAll("#net, canvas.mreza").forEach(c=>{const x=c.getContext("2d");let W=0,H,P=[],vid=true,radi=false,spremno=false;const R=matchMedia("(prefers-reduced-motion: reduce)").matches;
-function size(){const r=c.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);if(r.width===W&&P.length)return;W=r.width;H=r.height;c.width=W*d;c.height=H*d;x.setTransform(d,0,0,d,0,0);
-const mali=W<600,n=Math.round(Math.min(mali?36:90,W*H/(mali?16000:14000)));P=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25,r:Math.random()*1.4+.8}));draw()}
-function draw(){x.clearRect(0,0,W,H);const D=W<600?120:150;
-for(let i=0;i<P.length;i++){const a=P[i];for(let j=i+1;j<P.length;j++){const b=P[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.hypot(dx,dy);if(d<D){x.strokeStyle="rgba(120,170,255,"+(1-d/D)*.35+")";x.lineWidth=.8;x.beginPath();x.moveTo(a.x,a.y);x.lineTo(b.x,b.y);x.stroke()}}}
-for(const p of P){x.fillStyle="rgba(170,215,255,.9)";x.beginPath();x.arc(p.x,p.y,p.r,0,7);x.fill()}}
-function step(){if(!vid||document.hidden){radi=false;return}for(const p of P){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1}draw();requestAnimationFrame(step)}
-function kreni(){if(spremno&&!R&&!radi&&vid&&!document.hidden){radi=true;requestAnimationFrame(step)}}
-addEventListener("resize",size);size();
-if("IntersectionObserver"in window)new IntersectionObserver(e=>{vid=e[0].isIntersecting;kreni()}).observe(c);
-document.addEventListener("visibilitychange",kreni);
-// prvi kadar odmah (mirna mreža), pokret tek kad se stranica učita i procesor odmori — lakše učitavanje na telefonu
-const pokreni=()=>{spremno=true;kreni()};const posle=()=>("requestIdleCallback"in window)?requestIdleCallback(pokreni,{timeout:2500}):setTimeout(pokreni,1200);
-document.readyState==="complete"?posle():addEventListener("load",posle,{once:true})});
-</script>
-</body>
-</html>
-""" % (json.dumps(t["c.copy"], ensure_ascii=False), json.dumps(t["c.ok"], ensure_ascii=False))
+</script>""" % (json.dumps(t["c.copy"], ensure_ascii=False), json.dumps(t["c.ok"], ensure_ascii=False)) + (
+        "<script>\n" + POKRET_JS + "</script>\n</body>\n</html>\n")
 
 
 for jez, put in (("sr", "index.html"), ("en", os.path.join("en", "index.html"))):
@@ -475,9 +593,10 @@ for jez, put in (("sr", "404.html"), ("en", os.path.join("en", "404.html"))):
     zaglavlje = re.search(r"<header>.*?</header>", cela, re.S).group(0)
     # linkovi iz menija vode na početnu stranicu jezika
     zaglavlje = zaglavlje.replace('href="#', f'href="{n["home_url"]}#')
-    podnozje = re.search(r"<footer>.*?</footer>", cela, re.S).group(0)
-    telo404 = (f'{zaglavlje}\n<main id="top"><div class="hero"><canvas id="net" aria-hidden="true"></canvas>'
-               f'<div class="w"><div class="eye">{n["eye"]}</div><h1>{n["h1"]}</h1>'
+    podnozje = re.search(r"<footer>.*?</footer>", cela, re.S).group(0).replace('href="#', f'href="{n["home_url"]}#')
+    podnozje = podnozje.replace(f'href="{n["home_url"]}#top"', 'href="#top"')
+    telo404 = (f'{zaglavlje}\n<main id="top"><div class="hero"><div class="nacrt" aria-hidden="true">{NACRT}</div>'
+               f'<div class="w hero-in"><div class="eye" data-n="404">{n["eye"]}</div><h1>{n["h1"]}</h1>'
                f'<p class="lede">{n["p"]}</p><div class="ctas">'
                f'<a class="btn btn-g" href="{n["home_url"]}">{n["home"]}</a>'
                f'<a class="btn btn-l" href="{n["kontakt_url"]}">{n["kontakt"]}</a></div></div></div></main>\n'
@@ -489,7 +608,8 @@ def okvir(jez, pocetna):
     """Zaglavlje i podnožje sa početne stranice; meni vodi na sekcije početne."""
     cela = stranica(jez)
     zaglavlje = re.search(r"<header>.*?</header>", cela, re.S).group(0).replace('href="#', f'href="{pocetna}#')
-    return zaglavlje, re.search(r"<footer>.*?</footer>", cela, re.S).group(0)
+    podnozje = re.search(r"<footer>.*?</footer>", cela, re.S).group(0).replace('href="#', f'href="{pocetna}#')
+    return zaglavlje, podnozje.replace(f'href="{pocetna}#top"', 'href="#top"')
 
 
 def drugi_jezik(zaglavlje, sr_url, en_url):
@@ -574,6 +694,7 @@ with open(os.path.join(IZLAZ, "_headers"), "w", encoding="utf-8", newline="\n") 
             "  Referrer-Policy: strict-origin-when-cross-origin\n"
             "  Permissions-Policy: camera=(), microphone=(), geolocation=()\n"
             "\n/fonts/*\n  Cache-Control: public, max-age=31536000, immutable\n"
+            "\n/js/*\n  Cache-Control: public, max-age=31536000, immutable\n"
             "\n/img/*\n  Cache-Control: public, max-age=2592000\n"
             "\n/*.png\n  Cache-Control: public, max-age=2592000\n"
             "\n/*.ico\n  Cache-Control: public, max-age=2592000\n"

@@ -21,7 +21,7 @@ vise.onclick=()=>{const otv=t.classList.toggle("open");vise.textContent=otv?L.ma
 if(r.link){const l=el("a","rev-more",L.link);l.href=r.link;l.target="_blank";l.rel="noopener";a.appendChild(l)}
 requestAnimationFrame(()=>{vise.hidden=t.scrollHeight<=t.clientHeight+2});return a}
 function nacrtaj(d){const w=el("div","w");
-const eye=el("div","eye",L.eye),h=el("h2",null,L.naslov);
+const eye=el("div","eye",L.eye),h=el("h2",null,L.naslov);eye.dataset.n="05";
 const sum=el("div","rev-sum"),score=el("div","rev-score"),g=el("div","rev-g");g.appendChild(gLogo(24));
 const info=el("div");info.append(zvezde(d.rating||0),el("div","rev-cnt",broj(d.userRatingCount).replace("{n}",d.userRatingCount)));
 score.append(g,el("div","rev-big",(d.rating||0).toFixed(1).replace(".",L.lang==="sr"?",":".")),info);

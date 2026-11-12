@@ -1,0 +1,14 @@
+{
+  "name": "mg-hero-3d",
+  "private": true,
+  "description": "3D zupčanici u hederu mechanicallygifted.rs (three.js), pakuje se esbuild-om u sajt/js/hero3d.js",
+  "scripts": {
+    "build": "esbuild src/hero3d.js --bundle --minify --format=esm --target=es2020 --legal-comments=none --outfile=../sajt/js/hero3d.js"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
