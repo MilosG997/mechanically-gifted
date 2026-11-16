@@ -44,6 +44,7 @@ PROJEKTI = {  # snimci početnih strana (isečke i veličine određuje portfolio
     "gfp": "https://gfpgloves.com/",
     "majstori": "https://majstoripazova.rs/",
     "draganic": "https://draganicstolarija.rs/",
+    "skolarac": "https://mojskolarac.rs/",
     "qa": fajl("qa.html"),
 }
 for ime, url in PROJEKTI.items():
